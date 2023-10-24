@@ -48,7 +48,6 @@ class getlogFromDB(QThread):
         super().__init__()
         self.main = parent
         self.running = True
-        self.conn = self.create_mysql_connection()
 
     # 데이터베이스 연결을 확인하는 함수
     # def check_database_connection(self):
@@ -77,8 +76,9 @@ class getlogFromDB(QThread):
         while self.running == True:
             self.update.emit()
             try:
+                self.conn = self.create_mysql_connection()
                 cursor = self.conn.cursor()
-                cursor.execute("SELECT * FROM iot_project ORDER BY your_timestamp_column DESC LIMIT 1;") # SELECT * FROM iot_project WHERE timestamp_column = (SELECT MAX(timestamp_column) FROM iot_project
+                cursor.execute("SELECT * FROM iot_project order by f1_timelog desc limit 1") # SELECT * FROM iot_project WHERE timestamp_column = (SELECT MAX(timestamp_column) FROM iot_project
                 # self.conn.commit()
                 # result = cursor.fetchall()
                 # for row in result:
@@ -86,7 +86,7 @@ class getlogFromDB(QThread):
                 #     print(row)
                 self.testprint(cursor)
                 # self.conn.close()
-                print("Database connection is active.")
+                # print("Database connection is active.")
             except:
                 print("Error Occured")
             time.sleep(1)  # 5초마다 데이터베이스 연결 상태 확인
@@ -146,7 +146,9 @@ class VideoStreamGUI(QMainWindow, from_class):
         self.dbmonitor = getlogFromDB(self)
         self.dbmonitor.daemon = True
         self.dbmonitor.start()
-
+        self.shot.hide()
+        self.RecordStart.hide()
+        self.RecordStop.hide()
         self.count = 0
         self.cap = None
         self.Camonoff.setText('Cam on')
