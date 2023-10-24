@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>727</width>
+    <height>708</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <widget class="QLabel" name="now_frame">
+   <property name="geometry">
+    <rect>
+     <x>510</x>
+     <y>330</y>
+     <width>481</width>
+     <height>291</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Box</enum>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="f2_button">
+   <property name="geometry">
+    <rect>
+     <x>790</x>
+     <y>30</y>
+     <width>141</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>관리 구역 접근 로그</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="f1_button">
+   <property name="geometry">
+    <rect>
+     <x>680</x>
+     <y>30</y>
+     <width>89</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>출입 로그</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="now_video">
+   <property name="geometry">
+    <rect>
+     <x>510</x>
+     <y>300</y>
+     <width>121</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>현재 영상</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="log_video">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>300</y>
+     <width>121</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>로그 영상</string>
+   </property>
+  </widget>
+  <widget class="QTableWidget" name="f1_log">
+   <property name="geometry">
+    <rect>
+     <x>25</x>
+     <y>90</y>
+     <width>931</width>
+     <height>192</height>
+    </rect>
+   </property>
+   <column>
+    <property name="text">
+     <string>current_man</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>inout</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>datetime</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>gate_mode</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>message</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QTableWidget" name="f2_log">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>90</y>
+     <width>941</width>
+     <height>192</height>
+    </rect>
+   </property>
+   <column>
+    <property name="text">
+     <string>distance</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>angle</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>datetime</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QLabel" name="log_frame">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>330</y>
+     <width>481</width>
+     <height>291</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Box</enum>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="Searchbar">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>50</y>
+     <width>201</width>
+     <height>25</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="log_video_2">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>20</y>
+     <width>131</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>로그 영상/캡처 검색</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="View_enter">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>50</y>
+     <width>89</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>View</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="Camonoff">
+   <property name="geometry">
+    <rect>
+     <x>510</x>
+     <y>630</y>
+     <width>89</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>CAM off</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="shot">
+   <property name="geometry">
+    <rect>
+     <x>610</x>
+     <y>630</y>
+     <width>89</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Capture</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="RecordStart">
+   <property name="geometry">
+    <rect>
+     <x>710</x>
+     <y>630</y>
+     <width>89</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Start</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="openFile">
+   <property name="geometry">
+    <rect>
+     <x>340</x>
+     <y>50</y>
+     <width>111</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>View_Camlog</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="RecordStop">
+   <property name="geometry">
+    <rect>
+     <x>810</x>
+     <y>630</y>
+     <width>89</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Stop</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
