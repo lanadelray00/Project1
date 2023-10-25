@@ -3,6 +3,9 @@
 const int TRIG = 7;
 const int ECHO = 6;
 
+// const int ledPin = 13;
+// int incomingByte;
+
 const int stepsPerRevolution = 64; 
 Stepper myStepper(stepsPerRevolution, 11,9,10,8); 
 
@@ -20,10 +23,23 @@ void setup() {
   pinMode(TRIG, OUTPUT);
   pinMode(ECHO, INPUT);
   myStepper.setSpeed(300);
+  
+  // pinMode(ledPin, OUTPUT);
 }
 
 void loop() {
   unsigned long t_now = millis();
+
+  // if (Serial.available() > 0) {
+  //       incomingByte = Serial.read();
+  //       if (incomingByte == 'H') {
+  //           digitalWrite(ledPin, HIGH);
+  //       }
+  //       if (incomingByte == 'L') {
+  //           digitalWrite(ledPin, LOW);
+  //       }
+  //   }
+
   if(t_now - t_prev >= t_delay) {
     t_prev = t_now;
   
