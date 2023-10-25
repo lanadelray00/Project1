@@ -1,6 +1,7 @@
 import cv2, imutils
 import platform
 import flask
+import csv
 import sys
 import time
 import mysql.connector
@@ -48,20 +49,13 @@ class getlogFromDB(QThread):
         super().__init__()
         self.main = parent
         self.running = True
-
-    # 데이터베이스 연결을 확인하는 함수
-    # def check_database_connection(self):
-    #     while True:
-    #         try:
-    #             cursor = self.conn.cursor()
-    #             cursor.execute("SELECT * from iot_project")
-    #             self.conn.commit()
-    #             self.conn.close()
-    #             print("Database connection is active.")
-    #         except:
-    #             print("Error Occured")
-    #         time.sleep(1)  # 5초마다 데이터베이스 연결 상태 확인
-
+        self.conn = self.create_mysql_connection()
+        cursor = self.conn.cursor()
+        self.validate_date = 0
+        if self.init == 0:
+            self.inittable(cursor)
+        else:
+            self.updatetable(cursor)
     def create_mysql_connection(self):
         return mysql.connector.connect(
         host = 'database-1.cupwi98n8kxr.ap-northeast-2.rds.amazonaws.com',
@@ -71,6 +65,9 @@ class getlogFromDB(QThread):
         database = 'amrbase'
     )
 
+    # def testf2_mysql_connetion(self):
+
+
     def run(self):
         # count = 0
         while self.running == True:
@@ -78,25 +75,42 @@ class getlogFromDB(QThread):
             try:
                 self.conn = self.create_mysql_connection()
                 cursor = self.conn.cursor()
-                cursor.execute("SELECT * FROM iot_project order by f1_timelog desc limit 1") # SELECT * FROM iot_project WHERE timestamp_column = (SELECT MAX(timestamp_column) FROM iot_project
+                 # SELECT * FROM iot_project WHERE timestamp_column = (SELECT MAX(timestamp_column) FROM iot_project
                 # self.conn.commit()
                 # result = cursor.fetchall()
                 # for row in result:
                 #     # 결과 처리
                 #     print(row)
-                self.testprint(cursor)
-                # self.conn.close()
+                self.updatetable(cursor)
+                # cursor.close()
                 # print("Database connection is active.")
             except:
                 print("Error Occured")
             time.sleep(1)  # 5초마다 데이터베이스 연결 상태 확인
 
-    def testprint(self,cursor):
+    def inittable(self,cursor):
+        cursor.execute('select * from iot_project')
+        result = cursor.fetchall()
+        self.init_f1 = result
+        for row in result[:-1]:
+            # 결과 처리
+            print(row)        
+            # self.Add(row)
+
+    def updatetable(self,cursor):
         # cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM iot_project order by f1_timelog desc limit 1")
         result = cursor.fetchall()
         for row in result:
             # 결과 처리
-            print(row)
+            if row[2] != self.validate_date:
+                print(row)
+                self.update_f1 = row
+                # self.Add(row)
+                self.validate_date = row[2]
+        cursor.close()
+        self.conn.close()
+
     def stop(self):
         self.running = False
         self.conn.cursor().close()
@@ -125,11 +139,25 @@ class VideoStreamGUI(QMainWindow, from_class):
     def __init__(self, parent = None):
         super().__init__()
         self.setupUi(self)
+        self.update_f1 = None
+        self.init_f1 = None
         self.isCameraOn = False
         self.isRecStart = False
-        
+        self.dbmonitor = getlogFromDB(self)
+        self.dbmonitor.daemon = True
+        self.dbmonitor.start()
+        self.inout = {1:'in',2:'out'}
+        self.mode = {0:'Auto', 1:'manual'}
+        self.init = 0
+        # self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         self.fps = 10
 
+        # date 초기값 설정
+        # self.date_start.setDate()
+
+
+        self.logsave_f1.clicked.connect(self.save_f1_data_to_csv)
+        self.logsave_f2.clicked.connect(self.save_f2_data_to_csv)
         self.pixmap1 = QPixmap()
         self.log_frame.setPixmap(self.pixmap1)
         self.pixmap2 = QPixmap()
@@ -143,9 +171,7 @@ class VideoStreamGUI(QMainWindow, from_class):
         self.record = Camera(self)
         self.record.daemon = True
 
-        self.dbmonitor = getlogFromDB(self)
-        self.dbmonitor.daemon = True
-        self.dbmonitor.start()
+
         self.shot.hide()
         self.RecordStart.hide()
         self.RecordStop.hide()
@@ -163,6 +189,56 @@ class VideoStreamGUI(QMainWindow, from_class):
         self.openFile.clicked.connect(self.searchFile)
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_frame)
+        self.resetDB.clicked.connect(self.Question)
+        
+        if self.init == 0:
+            self.Add(self.dbmonitor.init_f1)
+            self.init += 1
+            print(self.init)
+        
+        self.Add(self.dbmonitor.update_f1)
+        print(self.init)
+
+    def save_f2_data_to_csv(self):
+        self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        with open(self.now + '_f1.csv' , 'w', newline='') as csv_file:
+            csv_writer = csv.writer(csv_file)
+            table_widget = self.f2_log
+            for row in range(table_widget.rowCount()):
+                row_data = []
+                for column in range(table_widget.columnCount()):
+                    item = table_widget.item(row, column)
+                    if item is not None:
+                        row_data.append(item.text())
+                    else:
+                        row_data.append('')  # 빈 셀은 빈 문자열로 저장
+                csv_writer.writerow(row_data)
+
+    def save_f1_data_to_csv(self):
+        self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        with open(self.now + '_f1.csv' , 'w', newline='') as csv_file:
+            csv_writer = csv.writer(csv_file)
+            table_widget = self.f1_log
+            for row in range(table_widget.rowCount()):
+                row_data = []
+                for column in range(table_widget.columnCount()):
+                    item = table_widget.item(row, column)
+                    if item is not None:
+                        row_data.append(item.text())
+                    else:
+                        row_data.append('')  # 빈 셀은 빈 문자열로 저장
+                csv_writer.writerow(row_data)
+
+    def Add(self,res):
+            line = self.f1_log.rowCount()
+            
+            for each in res:
+                self.f1_log.insertRow(line)
+                self.f1_log.setItem(line, 0, QTableWidgetItem(str(each[0]) + '명'))
+                self.f1_log.setItem(line, 1, QTableWidgetItem(self.inout[each[1]]))
+                self.f1_log.setItem(line, 2, QTableWidgetItem(each[2]))
+                self.f1_log.setItem(line, 3, QTableWidgetItem(self.mode[each[3]]))
+                self.f1_log.setItem(line, 4, QTableWidgetItem(each[4]))
 
     def searchFile(self):
         try:
@@ -188,6 +264,20 @@ class VideoStreamGUI(QMainWindow, from_class):
         except Exception as e:
             pass
 
+    def Question(self):
+        retval = QMessageBox.question(self, "DB 및 테이블 전체 삭제",
+                             '정말 삭제하시겠습니까? - 복구 불가능!', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if retval == QMessageBox.Yes:
+            self.resetdb()
+        # else:
+            # QMessageBox.close()
+
+    def resetdb(self):
+        self.conn = self.dbmonitor.create_mysql_connection()
+        cursor = self.conn.cursor()
+        cursor.execute("delete from iot_project")
+        self.conn.commit()
+        self.f1_log.setRowCount(0)
 
     def update_frame(self):
         if self.cap is not None:
@@ -324,12 +414,30 @@ class VideoStreamGUI(QMainWindow, from_class):
         self.running = False
 
     def f1_select(self):
+        if self.f1_log.rowCount() == 0:
+            self.logsave_f1.hide()
+            self.logsave_f2.hide()
+        else:
+            self.logsave_f1.show()
         self.f1_log.show()
         self.f2_log.hide()
+
     def f2_select(self):
+        if self.f2_log.rowCount() == 0:
+            self.logsave_f1.hide()
+            self.logsave_f2.hide()
+        else:
+            self.logsave_f2.show()
         self.f2_log.show()
         self.f1_log.hide()
 
+        # if self.f1_log.rowCount() == 0:
+        #     self.logsave_f1.hide()
+        # else:
+        #     if self.f2_log.rowCount() == 0:
+        #         self.logsave_f2.hide()
+        #     else:
+        #         self.logsave_f2.show()
         
 def main():
     app = QApplication(sys.argv)
