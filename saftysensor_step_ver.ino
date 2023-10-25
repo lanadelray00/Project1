@@ -1,4 +1,5 @@
 #include <Stepper.h>
+#include <Servo.h>
 
 const int TRIG_1 = 5; //TRIG 핀 설정 (초음파 보내는 핀)
 const int ECHO_1 = 4; //ECHO 핀 설정 (초음파 받는 핀)
@@ -16,8 +17,13 @@ const unsigned long t_delay = 500;
 
 int i;
 int flag;
+int angle_servo = 0;
+int angle_step = 0;
+float one_step_angle = 360 / (2048 / stepsPerRevolution);
 long duration;
 int distance;
+int danger_distance = 5;
+Servo servo;
 
 void setup() {
   Serial.begin(9600);
@@ -26,6 +32,8 @@ void setup() {
   pinMode(TRIG_2, OUTPUT);
   pinMode(ECHO_2, INPUT);
   myStepper.setSpeed(300);
+  servo.attach(3);
+  servo.write(angle_servo);
   
   // pinMode(ledPin, OUTPUT);
 }
@@ -73,11 +81,23 @@ void loop() {
     Sensor(TRIG_2, ECHO_2);
     distance_2 = distance;
 
+    angle_step = one_step_angle * i;
+
+    if (distance_2 < danger_distance) {
+      angle_servo = one_step_angle * i;
+      servo.write(angle_servo);
+    }
+      
     Serial.print(distance_1);
     Serial.print(",");
-    Serial.println(distance_2);
+    Serial.print(distance_2);
     // Serial.println("cm");
+    Serial.print(",");
     Serial.print(i);
+    Serial.print(",");
+    Serial.print(angle_step);
+    Serial.print(",");
+    Serial.println(angle_servo);
   }
 }
 
