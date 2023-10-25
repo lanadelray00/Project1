@@ -56,7 +56,7 @@ void loop() {
       myStepper.step(stepsPerRevolution);
     }
 
-    if(i == 33) {
+    if(i == 16) {
       flag = -1;
     }
 
@@ -77,7 +77,7 @@ void loop() {
     Serial.print(",");
     Serial.println(distance_2);
     // Serial.println("cm");
-    // Serial.print(i);
+    Serial.print(i);
   }
 }
 
