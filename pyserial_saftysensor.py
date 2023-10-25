@@ -47,11 +47,14 @@ def read_arduino_safitysensor():
                     # f2_timelog_end = 
                     # f2_motor_angle = 
 
-                    query_2 = "insert into iot_project (f2_dist, f2_timelog, f2_video, f2_timelog_end, f2_motor_angle) values (%s, %s, 0, 0, 0)"
+                    # query_2 = "insert into iot_project (f2_dist, f2_timelog, f2_video, f2_timelog_end, f2_motor_angle) values (%s, %s, 0, 0, 0)"
+                    query_2 = "insert into iot_test2 (f2_dist, f2_timelog) values (%s, %s);"
                     cur.execute(query_2, ((f2_dist, f2_timelog)))
                     remote.commit()
                     
                     # # DB에 잘 insert되었는지 터미널에 프린트
+                    query_3 = "select * from iot_test2;"
+                    cur.execute(query_3)
                     result = cur.fetchall()
                     for row in result:
                         print(row)
