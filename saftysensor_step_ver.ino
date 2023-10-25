@@ -1,7 +1,7 @@
 #include <Stepper.h>
 
-const int TRIG_1 = 4; //TRIG 핀 설정 (초음파 보내는 핀)
-const int ECHO_1 = 3; //ECHO 핀 설정 (초음파 받는 핀)
+const int TRIG_1 = 5; //TRIG 핀 설정 (초음파 보내는 핀)
+const int ECHO_1 = 4; //ECHO 핀 설정 (초음파 받는 핀)
 const int TRIG_2 = 7; //TRIG 핀 설정 (초음파 보내는 핀)
 const int ECHO_2 = 6; //ECHO 핀 설정 (초음파 받는 핀)
 
@@ -16,6 +16,8 @@ const unsigned long t_delay = 500;
 
 int i;
 int flag;
+long duration;
+int distance;
 
 void setup() {
   Serial.begin(9600);
@@ -64,24 +66,12 @@ void loop() {
       myStepper.step(-stepsPerRevolution);
     }
 
-    unsigned long duration_1, distance_1, duration_2, distance_2;
-    digitalWrite(TRIG_1, LOW);
-    delayMicroseconds(2);
-    digitalWrite(TRIG_1, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(TRIG_1, LOW);
+    unsigned long distance_1, distance_2;
+    Sensor(TRIG_1, ECHO_1);
+    distance_1 = distance;
 
-    duration_1 = pulseIn(ECHO_1, HIGH);
-    distance_1 = duration_1 * 17 / 1000;
-
-    digitalWrite(TRIG_2, LOW);
-    delayMicroseconds(2);
-    digitalWrite(TRIG_2, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(TRIG_2, LOW);
-
-    duration_2 = pulseIn(ECHO_2, HIGH);
-    distance_2 = duration_2 * 17 / 1000;
+    Sensor(TRIG_2, ECHO_2);
+    distance_2 = distance;
 
     Serial.print(distance_1);
     Serial.print(",");
@@ -89,4 +79,14 @@ void loop() {
     // Serial.println("cm");
     // Serial.print(i);
   }
+}
+
+void Sensor(int TRIG, int ECHO){
+  digitalWrite(TRIG, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG, LOW);
+  duration = pulseIn(ECHO, HIGH);
+  distance = duration * 17 / 1000;
 }
