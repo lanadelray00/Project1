@@ -2,6 +2,7 @@ import serial
 import mysql.connector
 import threading
 from datetime import datetime
+import time
 
 # '----------------아두이노와 통신----------------'
 ardu = serial.Serial(port='/dev/ttyACM0', baudrate=9600,
@@ -9,6 +10,7 @@ ardu = serial.Serial(port='/dev/ttyACM0', baudrate=9600,
                      stopbits=serial.STOPBITS_ONE,
                      bytesize=serial.EIGHTBITS)
 # ardu = serial.Serial('/dev/ttyACM0', 9600, timeout=0.1)
+time.sleep(2)  # 접속 대기
 
 # '-------------------DB 연결-------------------'
 def Connect():
@@ -85,6 +87,23 @@ def read_arduino_safitysensor():
         except Exception as ex:
             print(ex)
             pass
+
+# '-------------양방향 통신 test------------'
+# def flash():
+#     while True:
+#         cmd = input()
+#         if cmd == "0":
+#             ardu.write(b'L')
+#         elif cmd == "1":
+#             ardu.write(b'H')
+#         elif cmd == "2":
+#             ardu.write(b'L')
+#             break
+#         else:
+#             print("0/1/2 입력")
+
+# flash_run = threading.Thread(target=flash)
+# flash_run.start()
 
 # '-----------------실행------------------'
 while True:
