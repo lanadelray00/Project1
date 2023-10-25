@@ -9,17 +9,18 @@ const int ECHO_2 = 6; //ECHO 핀 설정 (초음파 받는 핀)
 // const int ledPin = 13;
 // int incomingByte;
 
-const int stepsPerRevolution = 64; 
+const int stepsPerRevolution = 32; 
 Stepper myStepper(stepsPerRevolution, 11,9,10,8); 
 
 unsigned long t_prev = 0;
-const unsigned long t_delay = 500;
+const unsigned long t_delay = 100;
 
 int i;
 int flag;
 int angle_servo = 0;
-int angle_step = 0;
-float one_step_angle = 360 / (2048 / stepsPerRevolution);
+float angle_step = 0;
+//float one_step_angle = 360 / (2048 / stepsPerRevolution);
+float one_step_angle = 5.625;
 long duration;
 int distance;
 int danger_distance = 5;
@@ -64,7 +65,7 @@ void loop() {
       myStepper.step(stepsPerRevolution);
     }
 
-    if(i == 16) {
+    if(i == 34) {
       flag = -1;
     }
 
@@ -85,6 +86,13 @@ void loop() {
 
     if (distance_2 < danger_distance) {
       angle_servo = one_step_angle * i;
+      
+      if (angle_servo > 180) {
+        angle_servo = 179;
+      }
+      else if (angle_servo < 0) {
+        angle_servo = 1;
+      }
       servo.write(angle_servo);
     }
       
@@ -97,7 +105,8 @@ void loop() {
     Serial.print(",");
     Serial.print(angle_step);
     Serial.print(",");
-    Serial.println(angle_servo);
+    Serial.print(angle_servo);
+    Serial.println(".");
   }
 }
 
