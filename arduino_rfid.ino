@@ -6,6 +6,7 @@
 const int R_LED = A0;
 const int G_LED = A1;
 const int B_LED = A2;
+const int buzzerPin = A3;
 
 // card_1 73 BF 0D 12
 // card_2 C3 61 8E 12
@@ -29,8 +30,8 @@ String not_admin = "a3 c5 c0 12, 83 03 b8 12";  // 승인되지 않은 카드 ui
 
 void setup() {
   Serial.begin(9600);
+  pinMode(buzzerPin, OUTPUT);
   SPI.begin();
-
   for (byte i = 0; i < 6; i++) {
     key.keyByte[i] = 0xFF;
   }
@@ -74,14 +75,26 @@ void loop() {
       analogWrite(G_LED, 255);
       analogWrite(B_LED, 0);
       Serial.println("인증되었습니다.");
-      delay(500);
+
+      digitalWrite(buzzerPin, HIGH);
+      delay(300);
+      digitalWrite(buzzerPin, LOW);
+      delay(300);
     }
     else {
       analogWrite(R_LED, 255);
       analogWrite(G_LED, 0);
       analogWrite(B_LED, 0);
-      Serial.println("승인되지 않은 카드입니다.");\
-      delay(500);
+      Serial.println("승인되지 않은 카드입니다.");
+
+      digitalWrite(buzzerPin, HIGH);
+      delay(300);
+      digitalWrite(buzzerPin, LOW);
+      delay(300);
+      digitalWrite(buzzerPin, HIGH);
+      delay(300);
+      digitalWrite(buzzerPin, LOW);
+      delay(300);
     }
   }
 }
