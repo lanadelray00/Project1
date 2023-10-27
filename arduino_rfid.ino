@@ -1,11 +1,13 @@
 #include <MFRC522.h>
 #include <SPI.h>
+#include <LiquidCrystal_I2C.h>
+#include <Wire.h>
 
 #define RST_PIN 9
 #define SS_PIN 10
 const int R_LED = A0;
 const int G_LED = A1;
-const int B_LED = A2;
+const int B_LED = A2; 
 const int buzzerPin = A3;
 
 // card_1 73 BF 0D 12
@@ -14,10 +16,11 @@ const int buzzerPin = A3;
 // card_4 83 03 B8 12
 
 MFRC522 rfid(SS_PIN, RST_PIN);
-MFRC522::MIFARE_Key key; 
+MFRC522::MIFARE_Key key;
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
 byte nuidPICC[4];
 String uid;
-int flag = 1;
 
 String string_uid;
 String card_1 = "73 bf 0d 12";
@@ -35,6 +38,14 @@ void setup() {
   for (byte i = 0; i < 6; i++) {
     key.keyByte[i] = 0xFF;
   }
+  lcd.begin();
+  lcd.backlight();
+
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Please tag");
+  lcd.setCursor(0,1);
+  lcd.print("your employee ID");
 }
 
 String dump_byte_array(byte *buffer, byte bufferSize) {
@@ -50,6 +61,11 @@ String dump_byte_array(byte *buffer, byte bufferSize) {
 }
 
 void loop() {
+  lcd.setCursor(0,0);
+  lcd.print("Please tag");
+  lcd.setCursor(0,1);
+  lcd.print("your employee ID");
+
   if ( ! rfid.PICC_IsNewCardPresent())
     return;
 
@@ -70,22 +86,35 @@ void loop() {
     Serial.print(F("Card_uid:"));
     Serial.println(uid);
 
-    if (flag = -1 && admin.indexOf(uid) != -1) {
+    if (admin.indexOf(uid) != -1) {
       analogWrite(R_LED, 0);
       analogWrite(G_LED, 255);
       analogWrite(B_LED, 0);
       Serial.println("인증되었습니다.");
 
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print("Approved employee");
+      lcd.setCursor(0,1);
+      lcd.print("Please enter");
+
       digitalWrite(buzzerPin, HIGH);
       delay(300);
       digitalWrite(buzzerPin, LOW);
-      delay(300);
+      delay(1000);
     }
+
     else {
       analogWrite(R_LED, 255);
       analogWrite(G_LED, 0);
       analogWrite(B_LED, 0);
-      Serial.println("승인되지 않은 카드입니다.");
+      Serial.println("권한이 없는 카드입니다.");
+
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print("You are not");
+      lcd.setCursor(0,1);
+      lcd.print("authorized");
 
       digitalWrite(buzzerPin, HIGH);
       delay(300);
@@ -94,9 +123,36 @@ void loop() {
       digitalWrite(buzzerPin, HIGH);
       delay(300);
       digitalWrite(buzzerPin, LOW);
-      delay(300);
+      delay(1000);
     }
   }
+
+  else {
+    analogWrite(R_LED, 255);
+    analogWrite(G_LED, 165);
+    analogWrite(B_LED, 0);
+    Serial.println("이미 인증이 진행된 카드입니다.");
+
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Duplicate");
+    lcd.setCursor(0,1);
+    lcd.print("recognized card!");
+
+    digitalWrite(buzzerPin, HIGH);
+    delay(300);
+    digitalWrite(buzzerPin, LOW);
+    delay(300);
+    digitalWrite(buzzerPin, HIGH);
+    delay(300);
+    digitalWrite(buzzerPin, LOW);
+    delay(1000);
+  }
+
+  lcd.clear();
+  analogWrite(R_LED, 0);
+  analogWrite(G_LED, 0);
+  analogWrite(B_LED, 0);
 }
 
 void saveNuidPICC() {
