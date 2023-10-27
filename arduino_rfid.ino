@@ -2,9 +2,16 @@
 #include <SPI.h>
 #include <LiquidCrystal_I2C.h>
 #include <Wire.h>
+#include <Servo.h>
 
 #define RST_PIN 9
 #define SS_PIN 10
+
+Servo servo;
+MFRC522 rfid(SS_PIN, RST_PIN);
+MFRC522::MIFARE_Key key;
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
 const int R_LED = A0;
 const int G_LED = A1;
 const int B_LED = A2; 
@@ -15,14 +22,10 @@ const int buzzerPin = A3;
 // card_3 A3 C5 C0 12
 // card_4 83 03 B8 12
 
-MFRC522 rfid(SS_PIN, RST_PIN);
-MFRC522::MIFARE_Key key;
-LiquidCrystal_I2C lcd(0x27, 16, 2);
-
 byte nuidPICC[4];
 String uid;
-
 String string_uid;
+
 String card_1 = "73 bf 0d 12";
 String card_2 = "c3 61 8e 12";
 String card_3 = "a3 c5 c0 12";
@@ -34,13 +37,16 @@ String not_admin = "a3 c5 c0 12, 83 03 b8 12";  // 승인되지 않은 카드 ui
 void setup() {
   Serial.begin(9600);
   pinMode(buzzerPin, OUTPUT);
+  servo.attach(6);
+  
   SPI.begin();
+
   for (byte i = 0; i < 6; i++) {
     key.keyByte[i] = 0xFF;
   }
+
   lcd.begin();
   lcd.backlight();
-
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print("Please tag");
@@ -101,7 +107,10 @@ void loop() {
       digitalWrite(buzzerPin, HIGH);
       delay(300);
       digitalWrite(buzzerPin, LOW);
-      delay(1000);
+
+      servo.write(180);
+      delay(2000);
+      servo.write(0);
     }
 
     else {
