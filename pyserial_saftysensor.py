@@ -15,11 +15,11 @@ time.sleep(2)  # 접속 대기
 # '-------------------DB 연결-------------------'
 def Connect():
     return mysql.connector.connect(
-    host = "database-1.cn4fdtxirel2.ap-northeast-2.rds.amazonaws.com",
+    host = 'database-1.cupwi98n8kxr.ap-northeast-2.rds.amazonaws.com',
     port = 3306,
-    user = "robot",
-    password = '1234',
-    database = "armbase"
+    user = 'robot',
+    password = '728778',
+    database = 'amrbase'
     )
 
 # '---------------데이터테이블 생성----------------'
