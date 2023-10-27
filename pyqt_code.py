@@ -15,6 +15,7 @@ import datetime
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import QApplication, QMainWindow
 import numpy as np
+import serial
 
 ## webCam test
 # src = 0
@@ -45,17 +46,21 @@ from_class = uic.loadUiType("GUI.ui")[0]
 class getlogFromDB(QThread):
     update = pyqtSignal()
     
-    def __init__(self, sec=0, parent=None):
+    def __init__(self, parent=None):
         super().__init__()
-        self.main = parent
+        # self.main = VideoStreamGUI(self)
+        # self.main = parent
         self.running = True
+        self.update_f1 = None
+        self.init_f1 = None
+        self.update_f2 = None
+        self.init_f2 = None
         self.conn = self.create_mysql_connection()
         cursor = self.conn.cursor()
         self.validate_date = 0
-        if self.init == 0:
-            self.inittable(cursor)
-        else:
-            self.updatetable(cursor)
+        self.validate_index = 0
+        self.cnt = 0
+
     def create_mysql_connection(self):
         return mysql.connector.connect(
         host = 'database-1.cupwi98n8kxr.ap-northeast-2.rds.amazonaws.com',
@@ -65,51 +70,89 @@ class getlogFromDB(QThread):
         database = 'amrbase'
     )
 
+
     # def testf2_mysql_connetion(self):
 
 
     def run(self):
         # count = 0
         while self.running == True:
-            self.update.emit()
             try:
                 self.conn = self.create_mysql_connection()
                 cursor = self.conn.cursor()
-                 # SELECT * FROM iot_project WHERE timestamp_column = (SELECT MAX(timestamp_column) FROM iot_project
+                    # SELECT * FROM iot_project WHERE timestamp_column = (SELECT MAX(timestamp_column) FROM iot_project
                 # self.conn.commit()
                 # result = cursor.fetchall()
                 # for row in result:
                 #     # 결과 처리
                 #     print(row)
-                self.updatetable(cursor)
+                # self.updatetable(cursor)
                 # cursor.close()
                 # print("Database connection is active.")
+                if self.cnt == 0:
+                    print(self.cnt)
+                    self.inittable(cursor)
+                    self.cnt = 1
+                else:
+                    self.updatetable(cursor)
+                self.update.emit()
             except:
                 print("Error Occured")
             time.sleep(1)  # 5초마다 데이터베이스 연결 상태 확인
 
     def inittable(self,cursor):
-        cursor.execute('select * from iot_project')
+        cursor.execute('select * from iot_project_f1')
         result = cursor.fetchall()
-        self.init_f1 = result
+        self.init_f1 = result # f1 데이터
         for row in result[:-1]:
             # 결과 처리
-            print(row)        
+            print(row)    
+        cursor.execute('select * from iot_project_f2')
+        result = cursor.fetchall()
+        self.init_f2 = result # f2 데이터    
+        for row in result[:-1]:
+        # 결과 처리
+            print(row)    
             # self.Add(row)
 
     def updatetable(self,cursor):
         # cursor = self.conn.cursor()
-        cursor.execute("SELECT * FROM iot_project order by f1_timelog desc limit 1")
+        cursor.execute("SELECT * FROM iot_project_f1 order by f1_timelog desc limit 1")
         result = cursor.fetchall()
         for row in result:
             # 결과 처리
             if row[2] != self.validate_date:
-                print(row)
+                # print(row)
                 self.update_f1 = row
+                # print(row)
                 # self.Add(row)
                 self.validate_date = row[2]
+        # cursor.close()
+        # self.conn = self.create_mysql_connection()
+        # cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM iot_project_f2 order by f2_timelog desc limit 1")
+        result = cursor.fetchall()
+        for row in result:
+            # 결과 처리
+            if row[1] != self.validate_index:
+                # print(row)
+                self.update_f2 = row
+                # print(row)
+                # self.Add(row)
+                self.validate_index = row[1]
         cursor.close()
-        self.conn.close()
+        # self.conn.close()
+
+    def Add(self,res):
+            line = self.f1_log.rowCount()
+            
+            for each in res:
+                self.f1_log.insertRow(line)
+                self.f1_log.setItem(line, 0, QTableWidgetItem(str(each[0]) + '명'))
+                self.f1_log.setItem(line, 1, QTableWidgetItem(self.inout[each[1]]))
+                self.f1_log.setItem(line, 2, QTableWidgetItem(each[2]))
+                self.f1_log.setItem(line, 3, QTableWidgetItem(self.mode[each[3]]))
+                self.f1_log.setItem(line, 4, QTableWidgetItem(each[4]))
 
     def stop(self):
         self.running = False
@@ -139,16 +182,18 @@ class VideoStreamGUI(QMainWindow, from_class):
     def __init__(self, parent = None):
         super().__init__()
         self.setupUi(self)
-        self.update_f1 = None
-        self.init_f1 = None
+        # self.update_f1 = None
+        # self.init_f1 = None
         self.isCameraOn = False
         self.isRecStart = False
         self.dbmonitor = getlogFromDB(self)
         self.dbmonitor.daemon = True
         self.dbmonitor.start()
+        self.validate_date = 0
         self.inout = {1:'in',2:'out'}
         self.mode = {0:'Auto', 1:'manual'}
         self.init = 0
+        # self.cnt = 0
         # self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         self.fps = 10
 
@@ -162,10 +207,13 @@ class VideoStreamGUI(QMainWindow, from_class):
         self.log_frame.setPixmap(self.pixmap1)
         self.pixmap2 = QPixmap()
         self.now_frame.setPixmap(self.pixmap2)
-
+        self.logsave_f1.hide()
+        self.logsave_f2.hide()
         self.camera = Camera(self)
         self.camera.daemon = True
         
+        # self.Add1(self.dbmonitor.init_f1)
+        # self.dbmonitor.update.connect()
         self.f1_log.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.f2_log.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.record = Camera(self)
@@ -175,13 +223,19 @@ class VideoStreamGUI(QMainWindow, from_class):
         self.shot.hide()
         self.RecordStart.hide()
         self.RecordStop.hide()
-        self.count = 0
+        self.cnt = 0
         self.cap = None
         self.Camonoff.setText('Cam on')
         self.f1_button.clicked.connect(self.f1_select)
         self.f2_button.clicked.connect(self.f2_select)
         self.camera.update.connect(self.updateCamera)
         self.record.update.connect(self.updateRecording)
+        # if self.cnt == 0:
+        #     self.dbmonitor.update.connect(self.init_f1_add)
+        #     # self.dbmonitor.update.connect(self.Add2)
+        #     self.cnt += 1
+        # else:
+        #     self.dbmonitor.update.connect(self.update_f1_add)
         self.Camonoff.clicked.connect(self.clickCamera)
         self.RecordStart.clicked.connect(self.clickRecord)
         self.RecordStop.clicked.connect(self.clickRecord)
@@ -189,16 +243,70 @@ class VideoStreamGUI(QMainWindow, from_class):
         self.openFile.clicked.connect(self.searchFile)
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_frame)
-        self.resetDB.clicked.connect(self.Question)
-        
-        if self.init == 0:
-            self.Add(self.dbmonitor.init_f1)
-            self.init += 1
-            print(self.init)
-        
-        self.Add(self.dbmonitor.update_f1)
-        print(self.init)
+        self.resetDB_f1.clicked.connect(self.Question_f1)
+        self.resetDB_f2.clicked.connect(self.Question_f2)
+        self.Search_f1.clicked.connect(self.setdateRange_f1)
+        self.Search_f2.clicked.connect(self.setdateRange_f2)
+        self.dbmonitor.update.connect(self.dbtotable)
 
+    
+
+
+    def dbtotable(self):
+        if self.init == 0:
+            self.init_f1_add()
+            self.init_f2_add()
+            self.init += 1
+            # print(self.init)
+        else:
+            self.update_f1_add()
+            self.update_f2_add()
+            # print(self.init)
+
+    def init_f1_add(self):
+        self.Add1_init(self.dbmonitor.init_f1)
+
+    def update_f1_add(self):
+        self.Add1_update(self.dbmonitor.update_f1)
+
+    def init_f2_add(self):
+        self.Add2_init(self.dbmonitor.init_f2)
+
+    def update_f2_add(self):
+        self.Add2_update(self.dbmonitor.update_f2)
+
+    def qdate2int(self,date):
+        return date.date().year() * 10e+10 + date.date().month() *10e+8 + date.date().day()*10e+6 + date.time().hour()*10000 + date.time().minute()*100 + date.time().second()
+    
+    def str2int(self,date):
+        return int(date[:4])*10e+10 + int(date[5:7])*10e+8 + int(date[8:10])*10e+6 + int(date[11:13])*10e+4 + int(date[14:16])*10e+2 + int(date[17:19])
+
+    # 조건에 따라 행을 필터링하는 함수를 정의합니다.
+    def filter_rows(self,condition,table_widget):
+        for row in range(table_widget.rowCount()):
+            item = table_widget.item(row, 2)  # 조건이 나이 열을 기반으로 한다고 가정 (열 인덱스 2)
+            if item is not None:
+                each = item.text()
+                if condition(self.str2int(each)):
+                    table_widget.setRowHidden(row, False)
+                else:
+                    table_widget.setRowHidden(row, True)
+
+    def setdateRange_f2(self):
+        start = self.qdate2int(self.date_start.dateTime())
+        end = self.qdate2int(self.date_end.dateTime())
+        self.condition = lambda date : date >= start and date <= end
+        # print(start)
+        self.filter_rows(self.condition, self.f2_log)
+
+    def setdateRange_f1(self):
+        start = self.qdate2int(self.date_start.dateTime())
+        end = self.qdate2int(self.date_end.dateTime())
+        self.condition = lambda date : date >= start and date <= end
+        # print(start)
+        self.filter_rows(self.condition, self.f1_log)
+        
+        # condition = lambda date : date.st
     def save_f2_data_to_csv(self):
         self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         with open(self.now + '_f1.csv' , 'w', newline='') as csv_file:
@@ -229,16 +337,69 @@ class VideoStreamGUI(QMainWindow, from_class):
                         row_data.append('')  # 빈 셀은 빈 문자열로 저장
                 csv_writer.writerow(row_data)
 
-    def Add(self,res):
-            line = self.f1_log.rowCount()
-            
-            for each in res:
-                self.f1_log.insertRow(line)
-                self.f1_log.setItem(line, 0, QTableWidgetItem(str(each[0]) + '명'))
-                self.f1_log.setItem(line, 1, QTableWidgetItem(self.inout[each[1]]))
-                self.f1_log.setItem(line, 2, QTableWidgetItem(each[2]))
-                self.f1_log.setItem(line, 3, QTableWidgetItem(self.mode[each[3]]))
-                self.f1_log.setItem(line, 4, QTableWidgetItem(each[4]))
+
+    def Add2_update(self,res):
+        line = self.f2_log.rowCount()
+        try:
+            if res[1] != self.past_validate_index:
+                # print(res)
+                self.f2_log.insertRow(0)
+                self.f2_log.setItem(0, 0, QTableWidgetItem(res[0]))
+                self.f2_log.setItem(0, 1, QTableWidgetItem(res[1]))
+                self.f2_log.setItem(0, 2, QTableWidgetItem(res[2]))
+                self.f2_log.setItem(0, 3, QTableWidgetItem(res[3]))
+                self.f2_log.setItem(0, 4, QTableWidgetItem(res[4]))
+                self.f2_log.setItem(0, 5, QTableWidgetItem(res[5]))
+                self.f2_log.setItem(0, 6, QTableWidgetItem(str(res[6]))) 
+                self.past_validate_index = res[1] 
+        except:
+            pass
+
+    def Add2_init(self,res):
+        line = self.f2_log.rowCount()
+        # self.past_validate_date = res[0][2]
+        for each in res:
+            # print(res)
+        # self.Add(row)
+            self.f2_log.insertRow(line)
+            self.past_validate_index = each[1]
+            self.f2_log.setItem(line, 0, QTableWidgetItem(each[0]))
+            self.f2_log.setItem(line, 1, QTableWidgetItem(each[1]))
+            self.f2_log.setItem(line, 2, QTableWidgetItem(each[2]))
+            self.f2_log.setItem(line, 3, QTableWidgetItem(each[3]))
+            self.f2_log.setItem(line, 4, QTableWidgetItem(each[4]))
+            self.f2_log.setItem(line, 5, QTableWidgetItem(each[5]))
+            self.f2_log.setItem(line, 6, QTableWidgetItem(str(each[6])))
+
+    def Add1_update(self,res):
+        line = self.f1_log.rowCount()
+        # try:
+        if res[2] != self.past_validate_date:
+            # print(res)
+            self.f1_log.insertRow(0)
+            self.f1_log.setItem(0, 0, QTableWidgetItem(str(res[0]) + '명'))
+            self.f1_log.setItem(0, 1, QTableWidgetItem(self.inout[res[1]]))
+            self.f1_log.setItem(0, 2, QTableWidgetItem(res[2]))
+            self.f1_log.setItem(0, 3, QTableWidgetItem(self.mode[res[3]]))
+            self.f1_log.setItem(0, 4, QTableWidgetItem(res[4]))   
+            self.past_validate_date = res[2] 
+        # except:
+        #     pass
+
+
+    def Add1_init(self,res):
+        line = self.f1_log.rowCount()
+            # self.past_validate_date = res[0][2]
+        for each in res:
+            # print(res)
+        # self.Add(row)
+            self.f1_log.insertRow(line)
+            self.past_validate_date = each[2]
+            self.f1_log.setItem(line, 0, QTableWidgetItem(str(each[0]) + '명'))
+            self.f1_log.setItem(line, 1, QTableWidgetItem(self.inout[each[1]]))
+            self.f1_log.setItem(line, 2, QTableWidgetItem(each[2]))
+            self.f1_log.setItem(line, 3, QTableWidgetItem(self.mode[each[3]]))
+            self.f1_log.setItem(line, 4, QTableWidgetItem(each[4]))
 
     def searchFile(self):
         try:
@@ -264,20 +425,33 @@ class VideoStreamGUI(QMainWindow, from_class):
         except Exception as e:
             pass
 
-    def Question(self):
+    def Question_f1(self):
         retval = QMessageBox.question(self, "DB 및 테이블 전체 삭제",
                              '정말 삭제하시겠습니까? - 복구 불가능!', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if retval == QMessageBox.Yes:
-            self.resetdb()
+            self.resetdb_f1()
         # else:
-            # QMessageBox.close()
+            # QMessageBox.close()   
 
-    def resetdb(self):
+    def Question_f2(self):
+        retval = QMessageBox.question(self, "DB 및 테이블 전체 삭제",
+                             '정말 삭제하시겠습니까? - 복구 불가능!', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if retval == QMessageBox.Yes:
+            self.resetdb_f2()
+
+    def resetdb_f1(self):
         self.conn = self.dbmonitor.create_mysql_connection()
         cursor = self.conn.cursor()
-        cursor.execute("delete from iot_project")
+        cursor.execute("delete from iot_project_f1")
         self.conn.commit()
         self.f1_log.setRowCount(0)
+
+    def resetdb_f2(self):
+        self.conn = self.dbmonitor.create_mysql_connection()
+        cursor = self.conn.cursor()
+        cursor.execute("delete from iot_project_f2")
+        self.conn.commit()
+        self.f2_log.setRowCount(0)
 
     def update_frame(self):
         if self.cap is not None:
@@ -417,19 +591,27 @@ class VideoStreamGUI(QMainWindow, from_class):
         if self.f1_log.rowCount() == 0:
             self.logsave_f1.hide()
             self.logsave_f2.hide()
+            self.resetDB_f1.show()
         else:
             self.logsave_f1.show()
+            self.resetDB_f2.hide()
         self.f1_log.show()
         self.f2_log.hide()
+        self.Search_f1.show()
+        self.Search_f2.hide()
 
     def f2_select(self):
         if self.f2_log.rowCount() == 0:
             self.logsave_f1.hide()
             self.logsave_f2.hide()
+            self.resetDB_f2.show()
         else:
             self.logsave_f2.show()
+            self.resetDB_f1.hide()
         self.f2_log.show()
         self.f1_log.hide()
+        self.Search_f2.show()
+        self.Search_f1.hide()
 
         # if self.f1_log.rowCount() == 0:
         #     self.logsave_f1.hide()
