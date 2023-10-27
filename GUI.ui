@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1007</width>
+    <width>1104</width>
     <height>708</height>
    </rect>
   </property>
@@ -86,7 +86,7 @@
     <rect>
      <x>25</x>
      <y>90</y>
-     <width>931</width>
+     <width>971</width>
      <height>192</height>
     </rect>
    </property>
@@ -121,7 +121,7 @@
     <rect>
      <x>20</x>
      <y>90</y>
-     <width>941</width>
+     <width>981</width>
      <height>192</height>
     </rect>
    </property>
@@ -147,12 +147,17 @@
    </column>
    <column>
     <property name="text">
-     <string>angle</string>
+     <string>datetime</string>
     </property>
    </column>
    <column>
     <property name="text">
-     <string>datetime</string>
+     <string>video</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>angle</string>
     </property>
    </column>
   </widget>

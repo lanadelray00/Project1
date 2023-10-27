@@ -90,7 +90,7 @@ class getlogFromDB(QThread):
                 # cursor.close()
                 # print("Database connection is active.")
                 if self.cnt == 0:
-                    print(self.cnt)
+                    # print(self.cnt)
                     self.inittable(cursor)
                     self.cnt = 1
                 else:
@@ -142,17 +142,6 @@ class getlogFromDB(QThread):
                 self.validate_index = row[1]
         cursor.close()
         # self.conn.close()
-
-    def Add(self,res):
-            line = self.f1_log.rowCount()
-            
-            for each in res:
-                self.f1_log.insertRow(line)
-                self.f1_log.setItem(line, 0, QTableWidgetItem(str(each[0]) + '명'))
-                self.f1_log.setItem(line, 1, QTableWidgetItem(self.inout[each[1]]))
-                self.f1_log.setItem(line, 2, QTableWidgetItem(each[2]))
-                self.f1_log.setItem(line, 3, QTableWidgetItem(self.mode[each[3]]))
-                self.f1_log.setItem(line, 4, QTableWidgetItem(each[4]))
 
     def stop(self):
         self.running = False
@@ -215,7 +204,10 @@ class VideoStreamGUI(QMainWindow, from_class):
         # self.Add1(self.dbmonitor.init_f1)
         # self.dbmonitor.update.connect()
         self.f1_log.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.f1_log.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.f2_log.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.f2_log.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        
         self.record = Camera(self)
         self.record.daemon = True
 
@@ -226,6 +218,7 @@ class VideoStreamGUI(QMainWindow, from_class):
         self.cnt = 0
         self.cap = None
         self.Camonoff.setText('Cam on')
+        self.clickCamera()
         self.f1_button.clicked.connect(self.f1_select)
         self.f2_button.clicked.connect(self.f2_select)
         self.camera.update.connect(self.updateCamera)
@@ -248,7 +241,8 @@ class VideoStreamGUI(QMainWindow, from_class):
         self.Search_f1.clicked.connect(self.setdateRange_f1)
         self.Search_f2.clicked.connect(self.setdateRange_f2)
         self.dbmonitor.update.connect(self.dbtotable)
-
+        self.dbmonitor.update.connect(self.autoRecord)
+        self.rec_mode = 'no'
     
 
 
@@ -257,9 +251,13 @@ class VideoStreamGUI(QMainWindow, from_class):
             self.init_f1_add()
             self.init_f2_add()
             self.init += 1
+            self.newDetect = 0
+            self.pastDetect = 0
             # print(self.init)
         else:
             self.update_f1_add()
+            if self.f2_log.rowCount() != 0:
+                self.pastDetect = self.newDetect
             self.update_f2_add()
             # print(self.init)
 
@@ -276,32 +274,65 @@ class VideoStreamGUI(QMainWindow, from_class):
         self.Add2_update(self.dbmonitor.update_f2)
 
     def qdate2int(self,date):
-        return date.date().year() * 10e+10 + date.date().month() *10e+8 + date.date().day()*10e+6 + date.time().hour()*10000 + date.time().minute()*100 + date.time().second()
-    
-    def str2int(self,date):
-        return int(date[:4])*10e+10 + int(date[5:7])*10e+8 + int(date[8:10])*10e+6 + int(date[11:13])*10e+4 + int(date[14:16])*10e+2 + int(date[17:19])
 
+        # ans = int(str(date.date().year()) + str(date.date().month()) + str(date.date().day()) + str(date.time().hour()) + str(date.time().minute()) + str(date.time().second()))
+        ans = int(date.toString("yyyyMMddhhmmss"))
+        # print(ans)
+        return ans
+    
+    # def str2int(self,date):
+    #     return int(date[:4])*10e+10 + int(date[5:7])*10e+8 + int(date[8:10])*10e+6 + int(date[11:13])*10e+4 + int(date[14:16])*10e+2 + int(date[17:19])
+    def str2int(self,date):
+        ans = int(date[:4]+ date[5:7] + date[8:10] + date[11:13] + date[14:16] + date[17:19])
+        # print(ans)
+        return ans
+    
     # 조건에 따라 행을 필터링하는 함수를 정의합니다.
     def filter_rows(self,condition,table_widget):
         for row in range(table_widget.rowCount()):
-            item = table_widget.item(row, 2)  # 조건이 나이 열을 기반으로 한다고 가정 (열 인덱스 2)
-            if item is not None:
-                each = item.text()
-                if condition(self.str2int(each)):
-                    table_widget.setRowHidden(row, False)
-                else:
-                    table_widget.setRowHidden(row, True)
+            if table_widget == self.f1_log:
+                item = table_widget.item(row, 2)  # 조건이 나이 열을 기반으로 한다고 가정 (열 인덱스 2)
+                if item is not None:
+                    each = item.text()
+                    if condition(self.str2int(each)):
+                        table_widget.setRowHidden(row, False)
+                    else:
+                        table_widget.setRowHidden(row, True)
+            else:
+                item = table_widget.item(row, 4)  # 조건 : 날짜
+                if item is not None:
+                    each = item.text()
+                    if condition(self.str2int(each)):
+                        table_widget.setRowHidden(row, False)
+                    else:
+                        table_widget.setRowHidden(row, True)  
 
     def setdateRange_f2(self):
-        start = self.qdate2int(self.date_start.dateTime())
-        end = self.qdate2int(self.date_end.dateTime())
+        if self.checkBox.isChecked():
+            start = self.qdate2int(QDateTime(1900, 1, 1, 1, 1, 0))
+            end = self.qdate2int(QDateTime(3000, 1, 1, 1, 1, 0))
+            # self.date_start.hide()
+            # self.date_end.hide()
+        else:
+            start = self.qdate2int(self.date_start.dateTime())
+            end = self.qdate2int(self.date_end.dateTime())
+            # self.date_start.show()
+            # self.date_end.show()
         self.condition = lambda date : date >= start and date <= end
         # print(start)
         self.filter_rows(self.condition, self.f2_log)
 
     def setdateRange_f1(self):
-        start = self.qdate2int(self.date_start.dateTime())
-        end = self.qdate2int(self.date_end.dateTime())
+        if self.checkBox.isChecked():
+            start = self.qdate2int(QDateTime(1900, 1, 1, 1, 1, 0))
+            end = self.qdate2int(QDateTime(3000, 1, 1, 1, 1, 0))
+            # self.date_start.hide()
+            # self.date_end.hide()
+        else:
+            start = self.qdate2int(self.date_start.dateTime())
+            end = self.qdate2int(self.date_end.dateTime())
+            # self.date_start.show()
+            # self.date_end.show()
         self.condition = lambda date : date >= start and date <= end
         # print(start)
         self.filter_rows(self.condition, self.f1_log)
@@ -344,13 +375,14 @@ class VideoStreamGUI(QMainWindow, from_class):
             if res[1] != self.past_validate_index:
                 # print(res)
                 self.f2_log.insertRow(0)
-                self.f2_log.setItem(0, 0, QTableWidgetItem(res[0]))
-                self.f2_log.setItem(0, 1, QTableWidgetItem(res[1]))
-                self.f2_log.setItem(0, 2, QTableWidgetItem(res[2]))
-                self.f2_log.setItem(0, 3, QTableWidgetItem(res[3]))
-                self.f2_log.setItem(0, 4, QTableWidgetItem(res[4]))
-                self.f2_log.setItem(0, 5, QTableWidgetItem(res[5]))
-                self.f2_log.setItem(0, 6, QTableWidgetItem(str(res[6]))) 
+                self.f2_log.setItem(0, 0, QTableWidgetItem(str(res[0])))
+                self.f2_log.setItem(0, 1, QTableWidgetItem(str(res[1])))
+                self.f2_log.setItem(0, 2, QTableWidgetItem(str(res[2])))
+                self.f2_log.setItem(0, 3, QTableWidgetItem(str(res[3])))
+                self.f2_log.setItem(0, 4, QTableWidgetItem(str(res[4])))
+                self.f2_log.setItem(0, 5, QTableWidgetItem(str(res[5])))
+                self.f2_log.setItem(0, 6, QTableWidgetItem(str(res[6])))
+                self.newDetect = str(res[1])
                 self.past_validate_index = res[1] 
         except:
             pass
@@ -363,12 +395,12 @@ class VideoStreamGUI(QMainWindow, from_class):
         # self.Add(row)
             self.f2_log.insertRow(line)
             self.past_validate_index = each[1]
-            self.f2_log.setItem(line, 0, QTableWidgetItem(each[0]))
-            self.f2_log.setItem(line, 1, QTableWidgetItem(each[1]))
-            self.f2_log.setItem(line, 2, QTableWidgetItem(each[2]))
-            self.f2_log.setItem(line, 3, QTableWidgetItem(each[3]))
-            self.f2_log.setItem(line, 4, QTableWidgetItem(each[4]))
-            self.f2_log.setItem(line, 5, QTableWidgetItem(each[5]))
+            self.f2_log.setItem(line, 0, QTableWidgetItem(str(each[0])))
+            self.f2_log.setItem(line, 1, QTableWidgetItem(str(each[1])))
+            self.f2_log.setItem(line, 2, QTableWidgetItem(str(each[2])))
+            self.f2_log.setItem(line, 3, QTableWidgetItem(str(each[3])))
+            self.f2_log.setItem(line, 4, QTableWidgetItem(str(each[4])))
+            self.f2_log.setItem(line, 5, QTableWidgetItem(str(each[5])))
             self.f2_log.setItem(line, 6, QTableWidgetItem(str(each[6])))
 
     def Add1_update(self,res):
@@ -507,6 +539,14 @@ class VideoStreamGUI(QMainWindow, from_class):
             # self.cameraStop()
             self.recordingStop()
 
+    def autoRecord(self):
+        if self.rec_mode == 'no' and self.newDetect != self.pastDetect:
+            self.recordingStart()
+            self.rec_mode = 'yes'
+        elif self.rec_mode == 'yes' and self.newDetect != self.pastDetect:
+            self.recordingStop()
+            self.rec_mode = 'no'
+
     def recordingStart(self):
         self.record.running = True
         self.record.start()
@@ -521,23 +561,23 @@ class VideoStreamGUI(QMainWindow, from_class):
         self.writer = cv2.VideoWriter(filename, self.fourcc, 20.0, (w, h))
 
     def clickCamera(self):
-                if self.isCameraOn == False:
-                    self.Camonoff.setText('Cam off')
-                    self.isCameraOn = True
-                    self.RecordStart.show()
-                    self.RecordStop.hide()
-                    self.shot.show()
+        if self.isCameraOn == False:
+            self.Camonoff.setText('Cam off')
+            self.isCameraOn = True
+            self.RecordStart.show()
+            self.RecordStop.hide()
+            self.shot.show()
 
-                    self.cameraStart()
-                else:
-                    self.Camonoff.setText('Cam on')
-                    self.isCameraOn = False
-                    self.RecordStart.hide()
-                    self.RecordStop.hide()
-                    self.shot.hide()
+            self.cameraStart()
+        else:
+            self.Camonoff.setText('Cam on')
+            self.isCameraOn = False
+            self.RecordStart.hide()
+            self.RecordStop.hide()
+            self.shot.hide()
 
-                    self.cameraStop()
-                    self.recordingStop()
+            self.cameraStop()
+            self.recordingStop()
 
     def recordingStop(self):
         self.record.running = False
@@ -569,7 +609,8 @@ class VideoStreamGUI(QMainWindow, from_class):
     def updateCamera(self):
         # self.label.setText('Camera Running : ' + str(self.count))
         # self.count += 1
-
+        # if self.isCameraOn == True:
+        #     self.autoRecord()
         retval, image = self.video.read()
 
         if retval:
@@ -592,9 +633,11 @@ class VideoStreamGUI(QMainWindow, from_class):
             self.logsave_f1.hide()
             self.logsave_f2.hide()
             self.resetDB_f1.show()
+            self.resetDB_f2.hide()
         else:
             self.logsave_f1.show()
-            self.resetDB_f2.hide()
+            self.resetDB_f2.show()
+            self.resetDB_f1.hide()
         self.f1_log.show()
         self.f2_log.hide()
         self.Search_f1.show()
@@ -605,9 +648,11 @@ class VideoStreamGUI(QMainWindow, from_class):
             self.logsave_f1.hide()
             self.logsave_f2.hide()
             self.resetDB_f2.show()
+            self.resetDB_f1.hide()
         else:
             self.logsave_f2.show()
             self.resetDB_f1.hide()
+            self.resetDB_f2.show()
         self.f2_log.show()
         self.f1_log.hide()
         self.Search_f2.show()
