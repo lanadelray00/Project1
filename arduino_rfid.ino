@@ -7,11 +7,17 @@
 #define RST_PIN 9
 #define SS_PIN 10
 
-Servo servo;
+Servo servo1;
+Servo servo2;
+
 MFRC522 rfid(SS_PIN, RST_PIN);
 MFRC522::MIFARE_Key key;
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
+const int TRIG1 = 4;
+const int ECHO1 = 3;
+const int TRIG2 = 7;
+const int ECHO2 = 6;
 const int R_LED = A0;
 const int G_LED = A1;
 const int B_LED = A2; 
@@ -22,6 +28,7 @@ const int buzzerPin = A3;
 // card_3 A3 C5 C0 12
 // card_4 83 03 B8 12
 
+int flag_allow = 1;
 byte nuidPICC[4];
 String uid;
 String string_uid;
@@ -34,16 +41,46 @@ String card_4 = "83 03 b8 12";
 String admin = "73 bf 0d 12, c3 61 8e 12";  // 승인된 카드 uid
 String not_admin = "a3 c5 c0 12, 83 03 b8 12";  // 승인되지 않은 카드 uid
 
+int min = 10000;
+int max = 0;
+int angle = 0;
+int peopleCount = 0;  // 건물 안에 있는 사람 수
+
+bool standIn = false;
+bool standOut = false;
+
+bool checkIn = false;
+bool checkOut = false;
+
+unsigned long eventTime = 0; // 이벤트 발생 시간
+unsigned long eventIn = 0; // 이벤트 발생 시간
+unsigned long eventOut = 0; // 이벤트 발생 시간
+unsigned long currentTime;
+unsigned long checkTime;
+unsigned int flag = 0;
+
 void setup() {
   Serial.begin(9600);
+  servo1.attach(5);
+  servo2.attach(8);
+  pinMode(TRIG1, OUTPUT);
+  pinMode(ECHO1, INPUT);
+  pinMode(TRIG2, OUTPUT);
+  pinMode(ECHO2, INPUT);
   pinMode(buzzerPin, OUTPUT);
-  servo.attach(6);
-  
+
   SPI.begin();
 
   for (byte i = 0; i < 6; i++) {
     key.keyByte[i] = 0xFF;
   }
+
+  for (byte i = 0; i < 6; i++) {
+    nuidPICC[i] = 0;
+  }
+
+  servo1.write(0);
+  servo2.write(0);
 
   lcd.begin();
   lcd.backlight();
@@ -67,10 +104,120 @@ String dump_byte_array(byte *buffer, byte bufferSize) {
 }
 
 void loop() {
+  checkIn = false; 
+  checkOut = false;
+
   lcd.setCursor(0,0);
   lcd.print("Please tag");
   lcd.setCursor(0,1);
   lcd.print("your employee ID");
+
+  long duration1, distance1;
+  long duration2, distance2;
+
+  digitalWrite(TRIG1, LOW);                                                                                                                                                                                                                                                                      
+  delayMicroseconds(2);
+  digitalWrite(TRIG1, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG1, LOW);
+  duration1 = pulseIn(ECHO1, HIGH);
+
+  digitalWrite(TRIG2, LOW);                                                                                                                                                                                                                                                                      
+  delayMicroseconds(2);
+  digitalWrite(TRIG2, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG2, LOW);
+  duration2 = pulseIn(ECHO2, HIGH);
+
+  distance1 = duration1 * 17 / 1000;
+  distance2 = duration2 * 17 / 1000;
+
+  Serial.print(distance1);
+  Serial.print(", ");
+  Serial.println(distance2);
+
+  Serial.print(peopleCount);
+  Serial.print(' ');
+  Serial.print(checkIn);
+  Serial.print(' ');
+  Serial.print(checkOut);
+  Serial.println();
+
+  Serial.println(flag_allow);
+
+  if (flag_allow == -1) {
+    if (distance1 < 7 && distance2 >= 7 && standIn == false && standOut == false && millis() - eventOut >= 5000) {
+      // 사람이 건물 안으로 들어온 경우
+      servo1.write(0);
+      servo2.write(90);
+      eventIn = millis();
+      standIn = true;
+      standOut = false;
+      flag = 1;
+      // delay(1000);
+      flag_allow = 1;
+    }
+  }
+
+  if (distance1 >= 7 && distance2 < 7 && standIn == true && standOut == false) {
+    // 사람이 건물 안으로 들어오는 경우
+    servo2.write(90);
+    peopleCount++;
+    Serial.println("\n 사람이 들어왔습니다.");
+    Serial.print("건물 안에 있는 사람 수: ");
+    Serial.println(peopleCount);
+    standIn = false;
+    standOut = false;
+    
+    checkIn = true; // 건물 안으로 들어 옴!
+    checkTime = millis();
+    flag = 0;
+    // delay(2000);
+  }
+
+  if (distance1 >= 7 && distance2 < 7 && standIn == false && standOut == false && millis() - eventIn >= 5000) {
+    // 사람이 건물 밖으로 나가는 경우
+    eventOut = millis();
+    servo2.write(90);
+    standIn = false;
+    standOut = true;
+    flag = 1;
+    // delay(1000);
+
+    // Serial.println("사람이 들어왔습니다.");
+  }
+
+  if (distance1 < 7 && distance2 >= 7 && standIn == false && standOut == true) {
+    // 사람이 건물 밖으로 나간 경우
+    servo2.write(90);
+    if (peopleCount >= 1){
+      peopleCount--;
+    }
+    Serial.println("사람이 나갔습니다.");
+    Serial.print("건물 안에 있는 사람 수: ");
+    Serial.println(peopleCount);
+  
+    standIn = false;
+    standOut = false;
+
+    checkOut = true;
+    checkTime = millis();
+    flag = 0;
+    // delay(3000);
+  }
+
+  if (distance1 >= 7 && distance2 >= 7 && standIn == false && standOut == false){
+    servo2.write(0);
+  }
+
+  // StandIn 또는 StandOut 후 10초 지나면 reset
+  if (distance1 >= 7 && distance2 >= 7 && standIn == true || standOut == true){
+    // Serial.print(millis());
+    if (((millis() - eventIn > 5000 && millis() - eventIn < 7000)|| (millis() - eventOut > 5000 && millis() - eventOut < 7000)) && flag == 1){
+      standIn = false;
+      standOut = false;
+    }
+  }
 
   if ( ! rfid.PICC_IsNewCardPresent())
     return;
@@ -93,6 +240,8 @@ void loop() {
     Serial.println(uid);
 
     if (admin.indexOf(uid) != -1) {
+      flag_allow = -1;
+      
       analogWrite(R_LED, 0);
       analogWrite(G_LED, 255);
       analogWrite(B_LED, 0);
@@ -108,9 +257,7 @@ void loop() {
       delay(300);
       digitalWrite(buzzerPin, LOW);
 
-      servo.write(180);
-      delay(2000);
-      servo.write(0);
+      servo1.write(180);
     }
 
     else {
