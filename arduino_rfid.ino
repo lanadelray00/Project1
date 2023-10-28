@@ -27,6 +27,7 @@ const int buzzerPin = A3;
 // card_2 C3 61 8E 12
 // card_3 A3 C5 C0 12
 // card_4 83 03 B8 12
+// card_5 53 ef ae 10
 
 int flag_allow = 1;
 byte nuidPICC[4];
@@ -37,8 +38,9 @@ String card_1 = "73 bf 0d 12";
 String card_2 = "c3 61 8e 12";
 String card_3 = "a3 c5 c0 12";
 String card_4 = "83 03 b8 12";
+String card_5 = "53 ef ae 10";
 
-String admin = "73 bf 0d 12, c3 61 8e 12";  // 승인된 카드 uid
+String admin = "73 bf 0d 12, c3 61 8e 12, 53 ef ae 10";  // 승인된 카드 uid
 String not_admin = "a3 c5 c0 12, 83 03 b8 12";  // 승인되지 않은 카드 uid
 
 int min = 10000;
@@ -104,9 +106,6 @@ String dump_byte_array(byte *buffer, byte bufferSize) {
 }
 
 void loop() {
-  checkIn = false; 
-  checkOut = false;
-
   lcd.setCursor(0,0);
   lcd.print("Please tag");
   lcd.setCursor(0,1);
@@ -141,6 +140,8 @@ void loop() {
   Serial.print(checkIn);
   Serial.print(' ');
   Serial.print(checkOut);
+  Serial.print(' ');
+  Serial.print(uid);
   Serial.println();
 
   Serial.println(flag_allow);
@@ -156,6 +157,9 @@ void loop() {
       flag = 1;
       // delay(1000);
       flag_allow = 1;
+      for (byte i = 0; i < 6; i++) {
+        nuidPICC[i] = 0;
+      }
     }
   }
 
@@ -169,7 +173,7 @@ void loop() {
     standIn = false;
     standOut = false;
     
-    checkIn = true; // 건물 안으로 들어 옴!
+    checkIn = false; // 건물 안으로 들어 옴!
     checkTime = millis();
     flag = 0;
     // delay(2000);
@@ -179,6 +183,7 @@ void loop() {
     // 사람이 건물 밖으로 나가는 경우
     eventOut = millis();
     servo2.write(90);
+    checkIn = false; 
     standIn = false;
     standOut = true;
     flag = 1;
@@ -236,28 +241,38 @@ void loop() {
     // changeString();
     uid = dump_byte_array(rfid.uid.uidByte, rfid.uid.size);
 
-    Serial.print(F("Card_uid:"));
-    Serial.println(uid);
+    // Serial.print(F("Card_uid:"));
+    // Serial.println(uid);
 
-    if (admin.indexOf(uid) != -1) {
-      flag_allow = -1;
-      
+    if (admin.indexOf(uid) != -1) {  
       analogWrite(R_LED, 0);
       analogWrite(G_LED, 255);
       analogWrite(B_LED, 0);
       Serial.println("인증되었습니다.");
 
-      lcd.clear();
-      lcd.setCursor(0,0);
-      lcd.print("Approved employee");
-      lcd.setCursor(0,1);
-      lcd.print("Please enter");
-
       digitalWrite(buzzerPin, HIGH);
       delay(300);
       digitalWrite(buzzerPin, LOW);
 
-      servo1.write(180);
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print("Approved employee");
+
+      if (checkOut == true) {
+        lcd.setCursor(0,1);
+        lcd.print("The exit is open");
+        servo1.write(180);
+        delay(2000);
+        servo1.write(0);
+        checkOut = false;
+      }
+      else {
+        lcd.setCursor(0,1);
+        lcd.print("Please enter");
+        servo1.write(180);
+        flag_allow = -1;
+        delay(1000);
+      }
     }
 
     else {
@@ -310,6 +325,10 @@ void loop() {
   analogWrite(G_LED, 0);
   analogWrite(B_LED, 0);
 }
+
+// switch (message) {
+//   case "73 bf 0d 12": lcd.setCursor(0,1); lcd.print("kCM");
+// }
 
 void saveNuidPICC() {
   for (byte i = 0; i < 4; i++) {
