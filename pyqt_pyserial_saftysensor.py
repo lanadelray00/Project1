@@ -16,7 +16,7 @@ danger_distance = 5  # 접근 금지 거리[cm]
 filter_sec = 3  # 해당 초 내에 다시 감지되는 경우 같은 경우로 인지
 now = datetime.now()
 
-from_class = uic.loadUiType("serial.ui")[0]
+from_class = uic.loadUiType("pyqt_kcm.ui")[0]
 
 class WindowClass(QMainWindow, from_class):
     def __init__(self):
