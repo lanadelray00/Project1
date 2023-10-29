@@ -61,6 +61,8 @@ unsigned long currentTime;
 unsigned long checkTime;
 unsigned int flag = 0;
 
+char inByte;
+
 void setup() {
   Serial.begin(9600);
   servo1.attach(5);
@@ -106,10 +108,38 @@ String dump_byte_array(byte *buffer, byte bufferSize) {
 }
 
 void loop() {
-  lcd.setCursor(0,0);
-  lcd.print("Please tag");
-  lcd.setCursor(0,1);
-  lcd.print("your employee ID");
+  // lcd.setCursor(0,0);
+  // lcd.print("Please tag");
+  // lcd.setCursor(0,1);
+  // lcd.print("your employee ID");
+
+  if (Serial.available()) {
+    inByte = Serial.read();
+
+    if (inByte == 'a') {
+      servo1.write(90);
+    }
+    
+    else if (inByte == 'b') {
+      servo1.write(0);
+    }
+
+    if (inByte == 'c') {
+      servo2.write(180);
+    }
+
+    else if (inByte == 'd') {
+      servo2.write(0);
+    }
+
+    else if (inByte == 'e') {
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print("Auto-control");
+      lcd.setCursor(0,1);
+      lcd.print("mode. Welcome.");
+    }
+  }
 
   long duration1, distance1;
   long duration2, distance2;
@@ -140,11 +170,11 @@ void loop() {
   Serial.print(checkIn);
   Serial.print(' ');
   Serial.print(checkOut);
-  Serial.print(' ');
-  Serial.print(uid);
+  // Serial.print(' ');
+  // Serial.print(uid);
   Serial.println();
 
-  Serial.println(flag_allow);
+  // Serial.println(flag_allow);
 
   if (flag_allow == -1) {
     if (distance1 < 7 && distance2 >= 7 && standIn == false && standOut == false && millis() - eventOut >= 5000) {
@@ -259,23 +289,35 @@ void loop() {
       lcd.print("Approved employee");
 
       if (checkOut == true) {
+        Serial.print("Out");
+        Serial.print(':');
+        Serial.println(uid);
+
         lcd.setCursor(0,1);
         lcd.print("The exit is open");
-        servo1.write(180);
+        servo1.write(90);
         delay(2000);
         servo1.write(0);
         checkOut = false;
       }
       else {
+        Serial.print("In");
+        Serial.print(':');
+        Serial.println(uid);
+
         lcd.setCursor(0,1);
         lcd.print("Please enter");
-        servo1.write(180);
+        servo1.write(90);
         flag_allow = -1;
         delay(1000);
       }
     }
 
     else {
+      Serial.print("Warning");
+      Serial.print(':');
+      Serial.println(uid);
+      
       analogWrite(R_LED, 255);
       analogWrite(G_LED, 0);
       analogWrite(B_LED, 0);
