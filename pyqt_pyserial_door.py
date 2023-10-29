@@ -51,7 +51,20 @@ class WindowClass(QMainWindow, from_class):
         self.pushButton_g1_close.clicked.connect(self.Send)
         self.pushButton_g2_open.clicked.connect(self.Send)
         self.pushButton_g2_close.clicked.connect(self.Send)
+
+        self.radioButton.clicked.connect(self.radioClicked)
+        self.radioButton_2.clicked.connect(self.radioClicked)
+        
         self.serial.receive.connect(self.Recv)
+
+    def radioClicked(self):
+        if self.radioButton.isChecked():
+            text = 'o'
+        elif self.radioButton_2.isChecked():
+            text = 'm'
+
+        text += "\n"
+        self.ardu.write(text.encode())
 
     def Send(self):
         sending_button = self.sender()
