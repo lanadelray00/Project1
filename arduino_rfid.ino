@@ -132,12 +132,36 @@ void loop() {
       servo2.write(0);
     }
 
-    else if (inByte == 'e') {
+    else if (inByte == 'o') {
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print("Changed to");
+      lcd.setCursor(0,1);
+      lcd.print("Auto-control");
+      
+      delay(1000);
+
       lcd.clear();
       lcd.setCursor(0,0);
       lcd.print("Auto-control");
       lcd.setCursor(0,1);
       lcd.print("mode. Welcome.");
+    }
+
+    else if (inByte == 'm') {
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print("Changed to");
+      lcd.setCursor(0,1);
+      lcd.print("Manual-mode.");
+
+      delay(1000);
+
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print("Manual-mode");
+      lcd.setCursor(0,1);
+      lcd.print("Welcome.");
     }
   }
 
