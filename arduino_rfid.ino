@@ -62,6 +62,7 @@ unsigned long checkTime;
 unsigned int flag = 0;
 
 char inByte;
+bool mode = true;
 
 void setup() {
   Serial.begin(9600);
@@ -108,10 +109,25 @@ String dump_byte_array(byte *buffer, byte bufferSize) {
 }
 
 void loop() {
-  // lcd.setCursor(0,0);
-  // lcd.print("Please tag");
-  // lcd.setCursor(0,1);
-  // lcd.print("your employee ID");
+  if (mode == true) {
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Please tag");
+    lcd.setCursor(0,1);
+    lcd.print("your employee ID");
+  }
+
+  else {
+    checkIn = false; 
+    checkOut = false;
+    flag_allow == -1;
+    
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Manual-mode.");
+    lcd.setCursor(0,1);
+    lcd.print("Welcome.");
+  }
 
   if (Serial.available()) {
     inByte = Serial.read();
@@ -133,12 +149,13 @@ void loop() {
     }
 
     else if (inByte == 'o') {
+      mode = true;
+      
       lcd.clear();
       lcd.setCursor(0,0);
       lcd.print("Changed to");
       lcd.setCursor(0,1);
       lcd.print("Auto-control");
-      
       delay(1000);
 
       lcd.clear();
@@ -149,19 +166,14 @@ void loop() {
     }
 
     else if (inByte == 'm') {
+      mode = false;
+
       lcd.clear();
       lcd.setCursor(0,0);
       lcd.print("Changed to");
       lcd.setCursor(0,1);
       lcd.print("Manual-mode.");
-
       delay(1000);
-
-      lcd.clear();
-      lcd.setCursor(0,0);
-      lcd.print("Manual-mode");
-      lcd.setCursor(0,1);
-      lcd.print("Welcome.");
     }
   }
 
@@ -185,9 +197,9 @@ void loop() {
   distance1 = duration1 * 17 / 1000;
   distance2 = duration2 * 17 / 1000;
 
-  Serial.print(distance1);
-  Serial.print(", ");
-  Serial.println(distance2);
+  // Serial.print(distance1);
+  // Serial.print(", ");
+  // Serial.println(distance2);
 
   Serial.print(peopleCount);
   Serial.print(' ');
@@ -203,7 +215,9 @@ void loop() {
   if (flag_allow == -1) {
     if (distance1 < 7 && distance2 >= 7 && standIn == false && standOut == false && millis() - eventOut >= 5000) {
       // 사람이 건물 안으로 들어온 경우
+      if (mode == true) {
       servo1.write(0);
+      }
       servo2.write(90);
       eventIn = millis();
       standIn = true;
@@ -278,80 +292,132 @@ void loop() {
     }
   }
 
-  if ( ! rfid.PICC_IsNewCardPresent())
-    return;
+    if ( ! rfid.PICC_IsNewCardPresent())
+      return;
 
-  if ( ! rfid.PICC_ReadCardSerial())
-    return;
+    if ( ! rfid.PICC_ReadCardSerial())
+      return;
 
-  if (rfid.uid.uidByte[0] != nuidPICC[0] || 
-    rfid.uid.uidByte[1] != nuidPICC[1] || 
-    rfid.uid.uidByte[2] != nuidPICC[2] || 
-    rfid.uid.uidByte[3] != nuidPICC[3] ) {
-    Serial.println(F("새로운 인증 시도"));
-
-    saveNuidPICC();
-
-    // changeString();
-    uid = dump_byte_array(rfid.uid.uidByte, rfid.uid.size);
-
-    // Serial.print(F("Card_uid:"));
-    // Serial.println(uid);
-
-    if (admin.indexOf(uid) != -1) {  
-      analogWrite(R_LED, 0);
-      analogWrite(G_LED, 255);
+  if (mode == false) {
+    if (rfid.uid.uidByte[0] != nuidPICC[0] || 
+      rfid.uid.uidByte[1] != nuidPICC[1] || 
+      rfid.uid.uidByte[2] != nuidPICC[2] || 
+      rfid.uid.uidByte[3] != nuidPICC[3] ) {
+      
+      analogWrite(R_LED, 255);
+      analogWrite(G_LED, 0);
       analogWrite(B_LED, 0);
-      Serial.println("인증되었습니다.");
+      Serial.println("수동모드 중 인증 시도.");
+
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print("Manual-mode.");
+      lcd.setCursor(6,1);
+      lcd.print("Don't tag!");
 
       digitalWrite(buzzerPin, HIGH);
       delay(300);
       digitalWrite(buzzerPin, LOW);
+      delay(300);
+      digitalWrite(buzzerPin, HIGH);
+      delay(300);
+      digitalWrite(buzzerPin, LOW);
+      delay(00);
+    }
+  }
 
-      lcd.clear();
-      lcd.setCursor(0,0);
-      lcd.print("Approved employee");
+  if (mode == true) {
+    if (rfid.uid.uidByte[0] != nuidPICC[0] || 
+      rfid.uid.uidByte[1] != nuidPICC[1] || 
+      rfid.uid.uidByte[2] != nuidPICC[2] || 
+      rfid.uid.uidByte[3] != nuidPICC[3] ) {
+      Serial.println(F("새로운 인증 시도"));
 
-      if (checkOut == true) {
-        Serial.print("Out");
-        Serial.print(':');
-        Serial.println(uid);
+      saveNuidPICC();
 
-        lcd.setCursor(0,1);
-        lcd.print("The exit is open");
-        servo1.write(90);
-        delay(2000);
-        servo1.write(0);
-        checkOut = false;
+      // changeString();
+      uid = dump_byte_array(rfid.uid.uidByte, rfid.uid.size);
+
+      // Serial.print(F("Card_uid:"));
+      // Serial.println(uid);
+
+      if (admin.indexOf(uid) != -1) {  
+        analogWrite(R_LED, 0);
+        analogWrite(G_LED, 255);
+        analogWrite(B_LED, 0);
+        Serial.println("인증되었습니다.");
+
+        digitalWrite(buzzerPin, HIGH);
+        delay(300);
+        digitalWrite(buzzerPin, LOW);
+
+        lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print("Approved employee");
+
+        if (checkOut == true) {
+          Serial.print("Out");
+          Serial.print(':');
+          Serial.println(uid);
+
+          lcd.setCursor(0,1);
+          lcd.print("The exit is open");
+          servo1.write(90);
+          delay(2000);
+          servo1.write(0);
+          checkOut = false;
+        }
+        else {
+          Serial.print("In");
+          Serial.print(':');
+          Serial.println(uid);
+
+          lcd.setCursor(0,1);
+          lcd.print("Please enter");
+          servo1.write(90);
+          flag_allow = -1;
+          delay(1000);
+        }
       }
+
       else {
-        Serial.print("In");
+        Serial.print("Warning");
         Serial.print(':');
         Serial.println(uid);
+        
+        analogWrite(R_LED, 255);
+        analogWrite(G_LED, 0);
+        analogWrite(B_LED, 0);
+        Serial.println("권한이 없는 카드입니다.");
 
+        lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print("You are not");
         lcd.setCursor(0,1);
-        lcd.print("Please enter");
-        servo1.write(90);
-        flag_allow = -1;
+        lcd.print("authorized");
+
+        digitalWrite(buzzerPin, HIGH);
+        delay(300);
+        digitalWrite(buzzerPin, LOW);
+        delay(300);
+        digitalWrite(buzzerPin, HIGH);
+        delay(300);
+        digitalWrite(buzzerPin, LOW);
         delay(1000);
       }
     }
 
     else {
-      Serial.print("Warning");
-      Serial.print(':');
-      Serial.println(uid);
-      
       analogWrite(R_LED, 255);
-      analogWrite(G_LED, 0);
+      analogWrite(G_LED, 165);
       analogWrite(B_LED, 0);
-      Serial.println("권한이 없는 카드입니다.");
+      Serial.println("이미 인증이 진행된 카드입니다.");
 
       lcd.clear();
       lcd.setCursor(0,0);
-      lcd.print("You are not");
+      lcd.print("Duplicate");
       lcd.setCursor(0,1);
-      lcd.print("authorized");
+      lcd.print("recognized card!");
 
       digitalWrite(buzzerPin, HIGH);
       delay(300);
@@ -363,29 +429,6 @@ void loop() {
       delay(1000);
     }
   }
-
-  else {
-    analogWrite(R_LED, 255);
-    analogWrite(G_LED, 165);
-    analogWrite(B_LED, 0);
-    Serial.println("이미 인증이 진행된 카드입니다.");
-
-    lcd.clear();
-    lcd.setCursor(0,0);
-    lcd.print("Duplicate");
-    lcd.setCursor(0,1);
-    lcd.print("recognized card!");
-
-    digitalWrite(buzzerPin, HIGH);
-    delay(300);
-    digitalWrite(buzzerPin, LOW);
-    delay(300);
-    digitalWrite(buzzerPin, HIGH);
-    delay(300);
-    digitalWrite(buzzerPin, LOW);
-    delay(1000);
-  }
-
   lcd.clear();
   analogWrite(R_LED, 0);
   analogWrite(G_LED, 0);
