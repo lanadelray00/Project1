@@ -12,6 +12,8 @@ import sqlite3
 import pandas as pd
 
 # '------------------변수 선언-------------------'
+flag = 1
+
 f1_hist_index = 0
 f1_warning_index = 0
 f1_gate = 'D'
@@ -96,8 +98,8 @@ class WindowClass(QMainWindow, from_class):
         query_last = "';"
         query_1 = "select * from iot_project_f1_emp where 보안출입증_ID = '" + str(f1_uid) + query_last
         # self.label.setText(query_1)
-        self.cur.execute(query_1)
-        self.result_query_1 = self.cur.fetchall()
+        self.cursor.execute(query_1)
+        self.result_query_1 = self.cursor.fetchall()
         # for row in result:
         #     print(row)
 
@@ -121,13 +123,13 @@ class WindowClass(QMainWindow, from_class):
         if f1_type == "Warning":
             f1_warning_index += 1
             query_2 = "insert into iot_project_f1_warning (순번, 사원번호, 보안출입증_ID, timelog, 출입문) values (%s, %s, %s, %s, %s);"
-            self.cur.execute(query_2, ((f1_warning_index, f1_empnum, f1_uid, f1_timelog, f1_gate)))
+            self.cursor.execute(query_2, ((f1_warning_index, f1_empnum, f1_uid, f1_timelog, f1_gate)))
             self.remote.commit()
 
             self.query_3 = "select * from iot_project_f1_warning order by timelog desc;"
 
-            self.cur.execute(self.query_3)
-            self.result_query_2 = self.cur.fetchall()
+            self.cursor.execute(self.query_3)
+            self.result_query_2 = self.cursor.fetchall()
             self.df_result_query_2 = pd.DataFrame(self.result_query_2)
 
             self.tableWidget_3.setRowCount(len(self.df_result_query_2))
@@ -144,21 +146,21 @@ class WindowClass(QMainWindow, from_class):
         elif f1_type == 'In':
             f1_hist_index += 1
             query_2 = "insert into iot_project_f1_hist (순번, 사원번호, 보안출입증_ID, timelog_in, 출입문) values (%s, %s, %s, %s, %s);"
-            self.cur.execute(query_2, ((f1_hist_index, f1_empnum, f1_uid, f1_timelog, f1_gate)))
+            self.cursor.execute(query_2, ((f1_hist_index, f1_empnum, f1_uid, f1_timelog, f1_gate)))
             self.remote.commit()
 
             self.query_3 = "select * from iot_project_f1_hist order by timelog_in desc;"
 
         elif f1_type == 'Out':
             query_2 = "update iot_project_f1_hist set timelog_out='" +  f1_timelog + "' order by timelog_in desc limit 1;"
-            self.cur.execute(query_2)
+            self.cursor.execute(query_2)
             self.remote.commit()
 
             self.query_3 = "select * from iot_project_f1_hist order by timelog_in desc;"
 
         if f1_type == 'In' or f1_type == 'Out':
-            self.cur.execute(self.query_3)
-            self.result_query_2 = self.cur.fetchall()
+            self.cursor.execute(self.query_3)
+            self.result_query_2 = self.cursor.fetchall()
             self.df_result_query_2 = pd.DataFrame(self.result_query_2)
 
             self.tableWidget.setRowCount(len(self.df_result_query_2))
@@ -188,11 +190,11 @@ class WindowClass(QMainWindow, from_class):
         # password = '728778',
         # database = 'amrbase'
         )
-        self.cur = self.remote.cursor(buffered=True)
+        self.cursor = self.remote.cursor(buffered=True)
 
     def Recv(self, message):
         self.textEdit.append(message)
-        # self.printEmp(message)
+        self.printEmp(message)
 
 
 class SerialManager(QThread):
@@ -204,7 +206,7 @@ class SerialManager(QThread):
         self.running = True
         self.f1_uid = None
         self.remote = self.Connect()
-        self.cur = self.remote.cursor(buffered=True)
+        self.cursor = self.remote.cursor(buffered=True)
 
     def run(self):
         while self.running == True:
@@ -215,21 +217,23 @@ class SerialManager(QThread):
         self.running = False
 
     def f1_execute_query_nonvideo(self, f1_count, f1_inout, f1_timelog, f1_gate_mode, f1_message, f1_index):
-        global dbon, check_in, check_out
+        global flag, dbon, check_in, check_out
         try:
             # 시리얼 모니터 출력 값
             serial_data = self.serial.readline().decode()
             parts = serial_data.strip().split()
-            self.receive.emit(str(parts))
+            # self.receive.emit(str(parts))
 
             if serial_data.find("peopleCount") > -1:
-                print(parts)
+                # print(parts)
                 f1_count, check_in, check_out = parts[1], parts[2], parts[3]
-                # print(parts[1], parts[2], parts[3]) 
+                print(parts[1], parts[2], parts[3])
+                # self.receive.emit(str(parts[3]))
                 
-                if check_in == '1' or check_out == '1':
+                if (flag == 1) and (check_in == '1' or check_out == '1'):
                     # print('Change!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-                    
+                    flag = -1
+
                     if check_in == '1':
                         f1_inout = 1
                     elif check_out == '1':
@@ -239,22 +243,23 @@ class SerialManager(QThread):
                     f1_timelog = current_time.strftime("%Y-%m-%d %H:%M:%S")
 
                     sql_insert = "insert into iot_project_f1 (f1_count, f1_inout, f1_timelog, f1_gate_mode, f1_message, f1_index) value (%s, %s, %s, %s, %s, %s)"
-                    self.cur.execute(sql_insert, (f1_count, f1_inout, f1_timelog, f1_gate_mode, f1_message, f1_index))
+                    self.cursor.execute(sql_insert, (f1_count, f1_inout, f1_timelog, f1_gate_mode, f1_message, f1_index))
                     f1_index += 1
                     self.remote.commit()
 
                     # DB에 잘 insert되었는지 터미널에 프린트
                     query_checking = "select * from iot_project_f1 order by f1_timelog desc limit 1;"
-                    self.cur.execute(query_checking)
+                    self.cursor.execute(query_checking)
 
-                    result = self.cur.fetchall()
+                    result = self.cursor.fetchall()
                     for row in result:
                         print(row)
                     
             if (serial_data.find("In") > -1) or (serial_data.find("Out") > -1) or (serial_data.find("Warning") > -1):
+                flag = 1
                 f1_uid = str(serial_data)[:-2]
                 # print(f1_uid)
-                # self.receive.emit(f1_uid)
+                self.receive.emit(f1_uid)
 
         except Exception as ex:
             print(ex)
