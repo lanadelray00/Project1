@@ -63,6 +63,7 @@ unsigned int flag = 0;
 
 char inByte;
 bool mode = true;
+bool flag_print = true;
 
 void setup() {
   Serial.begin(9600);
@@ -109,26 +110,6 @@ String dump_byte_array(byte *buffer, byte bufferSize) {
 }
 
 void loop() {
-  if (mode == true) {
-    lcd.clear();
-    lcd.setCursor(0,0);
-    lcd.print("Please tag");
-    lcd.setCursor(0,1);
-    lcd.print("your employee ID");
-  }
-
-  else {
-    checkIn = false; 
-    checkOut = false;
-    flag_allow == -1;
-    
-    lcd.clear();
-    lcd.setCursor(0,0);
-    lcd.print("Manual-mode.");
-    lcd.setCursor(0,1);
-    lcd.print("Welcome.");
-  }
-
   if (Serial.available()) {
     inByte = Serial.read();
 
@@ -201,14 +182,56 @@ void loop() {
   // Serial.print(", ");
   // Serial.println(distance2);
 
-  Serial.print(peopleCount);
-  Serial.print(' ');
-  Serial.print(checkIn);
-  Serial.print(' ');
-  Serial.print(checkOut);
-  // Serial.print(' ');
-  // Serial.print(uid);
-  Serial.println();
+  if (flag_print == true) {
+    Serial.print("peopleCount");
+    Serial.print(' ');
+    Serial.print(peopleCount);
+    Serial.print(' ');
+    Serial.print(checkIn);
+    Serial.print(' ');
+    Serial.print(checkOut);
+    Serial.print(' ');
+    Serial.print(mode);
+    Serial.println();
+    // Serial.print(flag_allow);
+    // Serial.println();
+  }
+
+  checkIn = false;
+  
+  if (mode == true) {
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Please tag");
+    lcd.setCursor(0,1);
+    lcd.print("your employee ID");
+  }
+
+  else if (mode == false) {
+    checkOut = false;
+    // flag_allow == -1;
+    flag_print = true;
+
+    if (distance1 < 7 && distance2 >= 7 && standIn == false && standOut == false && millis() - eventOut >= 5000) {
+      // 사람이 건물 안으로 들어온 경우
+      servo2.write(90);
+      eventIn = millis();
+      standIn = true;
+      standOut = false;
+      flag = 1;
+      // delay(1000);
+      flag_allow = 1;
+      for (byte i = 0; i < 6; i++) {
+        nuidPICC[i] = 0;
+      }
+    }
+    
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Manual-mode.");
+    lcd.setCursor(0,1);
+    lcd.print("Welcome.");
+  }
 
   // Serial.println(flag_allow);
 
@@ -241,7 +264,7 @@ void loop() {
     standIn = false;
     standOut = false;
     
-    checkIn = false; // 건물 안으로 들어 옴!
+    checkIn = true; // 건물 안으로 들어 옴!
     checkTime = millis();
     flag = 0;
     // delay(2000);
@@ -276,6 +299,19 @@ void loop() {
     checkOut = true;
     checkTime = millis();
     flag = 0;
+    
+    Serial.print("peopleCount");
+    Serial.print(' ');
+    Serial.print(peopleCount);
+    Serial.print(' ');
+    Serial.print(checkIn);
+    Serial.print(' ');
+    Serial.print(checkOut);
+    Serial.print(' ');
+    Serial.print(mode);
+    Serial.println();
+
+    flag_print = false;
     // delay(3000);
   }
 
@@ -356,6 +392,8 @@ void loop() {
         lcd.print("Approved employee");
 
         if (checkOut == true) {
+          flag_print = true;
+          
           Serial.print("Out");
           Serial.print(':');
           Serial.println(uid);
