@@ -449,6 +449,36 @@
      <height>271</height>
     </rect>
    </property>
+   <column>
+    <property name="text">
+     <string>순번</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>사원번호</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>보안출입증_ID</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>timelog_in</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>timelog_out</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>출입문</string>
+    </property>
+   </column>
   </widget>
   <widget class="QTableWidget" name="tableWidget_2">
    <property name="geometry">
@@ -504,36 +534,352 @@
      <x>990</x>
      <y>410</y>
      <width>271</width>
-     <height>261</height>
+     <height>171</height>
     </rect>
    </property>
-  </widget>
-  <widget class="QPushButton" name="pushButton">
-   <property name="geometry">
-    <rect>
-     <x>1170</x>
-     <y>20</y>
-     <width>89</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>PushButton</string>
-   </property>
+   <column>
+    <property name="text">
+     <string>순번</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>사원번호</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>보안출입증_ID</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>timelog</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>출입문</string>
+    </property>
+   </column>
   </widget>
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>80</x>
-     <y>180</y>
-     <width>1021</width>
-     <height>71</height>
+     <x>710</x>
+     <y>58</y>
+     <width>91</width>
+     <height>16</height>
     </rect>
    </property>
    <property name="text">
-    <string>TextLabel</string>
+    <string>입출입 기록 :</string>
    </property>
   </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>990</x>
+     <y>60</y>
+     <width>271</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>마지막 인증 시도 : </string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>990</x>
+     <y>379</y>
+     <width>271</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>권한 없는 보안출입증 인증 시도 :</string>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox">
+   <property name="geometry">
+    <rect>
+     <x>990</x>
+     <y>620</y>
+     <width>271</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string/>
+   </property>
+   <widget class="QRadioButton" name="radioButton">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>11</y>
+      <width>112</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>자동</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="radioButton_2">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>11</y>
+      <width>112</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>수동</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>990</x>
+     <y>593</y>
+     <width>181</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>게이트 모드 선택</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_5">
+   <property name="geometry">
+    <rect>
+     <x>990</x>
+     <y>680</y>
+     <width>181</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>게이트 제어</string>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_2">
+   <property name="geometry">
+    <rect>
+     <x>990</x>
+     <y>707</y>
+     <width>271</width>
+     <height>81</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string/>
+   </property>
+   <widget class="QPushButton" name="pushButton_g1_open">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>14</y>
+      <width>89</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Open</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_g1_close">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>14</y>
+      <width>89</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Close</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_g2_open">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>46</y>
+      <width>89</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Open</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_g2_close">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>46</y>
+      <width>89</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Close</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_6">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>17</y>
+      <width>51</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>gate1 :</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_7">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>49</y>
+      <width>51</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>gate2 :</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QLabel" name="log_video_5">
+   <property name="geometry">
+    <rect>
+     <x>710</x>
+     <y>20</y>
+     <width>131</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>날짜 설정 :</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="Search_f2_2">
+   <property name="geometry">
+    <rect>
+     <x>1150</x>
+     <y>20</y>
+     <width>111</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Search</string>
+   </property>
+  </widget>
+  <widget class="QDateTimeEdit" name="date_start_2">
+   <property name="geometry">
+    <rect>
+     <x>830</x>
+     <y>20</y>
+     <width>131</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="displayFormat">
+    <string>yyyy. M. d. h:mm</string>
+   </property>
+   <property name="calendarPopup">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox_2">
+   <property name="geometry">
+    <rect>
+     <x>782</x>
+     <y>21</y>
+     <width>51</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>All</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEdit">
+   <property name="geometry">
+    <rect>
+     <x>1012</x>
+     <y>20</y>
+     <width>131</width>
+     <height>25</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="log_video_6">
+   <property name="geometry">
+    <rect>
+     <x>970</x>
+     <y>21</y>
+     <width>71</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>검색 :</string>
+   </property>
+  </widget>
+  <zorder>groupBox_2</zorder>
+  <zorder>now_frame</zorder>
+  <zorder>f2_button</zorder>
+  <zorder>f1_button</zorder>
+  <zorder>now_video</zorder>
+  <zorder>log_video</zorder>
+  <zorder>f1_log</zorder>
+  <zorder>f2_log</zorder>
+  <zorder>log_frame</zorder>
+  <zorder>Searchbar</zorder>
+  <zorder>log_video_2</zorder>
+  <zorder>View_enter</zorder>
+  <zorder>Camonoff</zorder>
+  <zorder>shot</zorder>
+  <zorder>RecordStart</zorder>
+  <zorder>openFile</zorder>
+  <zorder>RecordStop</zorder>
+  <zorder>logsave_f1</zorder>
+  <zorder>resetDB_f1</zorder>
+  <zorder>logsave_f2</zorder>
+  <zorder>log_video_3</zorder>
+  <zorder>checkBox</zorder>
+  <zorder>log_video_4</zorder>
+  <zorder>Search_f1</zorder>
+  <zorder>Search_f2</zorder>
+  <zorder>date_start</zorder>
+  <zorder>date_end</zorder>
+  <zorder>resetDB_f2</zorder>
+  <zorder>textEdit</zorder>
+  <zorder>tableWidget</zorder>
+  <zorder>tableWidget_2</zorder>
+  <zorder>tableWidget_3</zorder>
+  <zorder>label</zorder>
+  <zorder>label_2</zorder>
+  <zorder>label_3</zorder>
+  <zorder>groupBox</zorder>
+  <zorder>label_4</zorder>
+  <zorder>label_5</zorder>
+  <zorder>log_video_5</zorder>
+  <zorder>Search_f2_2</zorder>
+  <zorder>date_start_2</zorder>
+  <zorder>checkBox_2</zorder>
+  <zorder>lineEdit</zorder>
+  <zorder>log_video_6</zorder>
  </widget>
  <resources/>
  <connections/>
