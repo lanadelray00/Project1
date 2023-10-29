@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1104</width>
-    <height>708</height>
+    <width>1310</width>
+    <height>804</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,8 @@
   <widget class="QLabel" name="now_frame">
    <property name="geometry">
     <rect>
-     <x>510</x>
-     <y>330</y>
+     <x>500</x>
+     <y>380</y>
      <width>481</width>
      <height>291</height>
     </rect>
@@ -32,8 +32,8 @@
   <widget class="QPushButton" name="f2_button">
    <property name="geometry">
     <rect>
-     <x>820</x>
-     <y>10</y>
+     <x>130</x>
+     <y>50</y>
      <width>140</width>
      <height>25</height>
     </rect>
@@ -45,8 +45,8 @@
   <widget class="QPushButton" name="f1_button">
    <property name="geometry">
     <rect>
-     <x>710</x>
-     <y>10</y>
+     <x>20</x>
+     <y>50</y>
      <width>88</width>
      <height>25</height>
     </rect>
@@ -58,8 +58,8 @@
   <widget class="QLabel" name="now_video">
    <property name="geometry">
     <rect>
-     <x>510</x>
-     <y>300</y>
+     <x>500</x>
+     <y>350</y>
      <width>121</width>
      <height>21</height>
     </rect>
@@ -72,7 +72,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>300</y>
+     <y>350</y>
      <width>121</width>
      <height>21</height>
     </rect>
@@ -84,10 +84,10 @@
   <widget class="QTableWidget" name="f1_log">
    <property name="geometry">
     <rect>
-     <x>25</x>
+     <x>21</x>
      <y>90</y>
-     <width>971</width>
-     <height>192</height>
+     <width>671</width>
+     <height>251</height>
     </rect>
    </property>
    <column>
@@ -119,10 +119,10 @@
   <widget class="QTableWidget" name="f2_log">
    <property name="geometry">
     <rect>
-     <x>20</x>
+     <x>21</x>
      <y>90</y>
-     <width>981</width>
-     <height>192</height>
+     <width>671</width>
+     <height>251</height>
     </rect>
    </property>
    <column>
@@ -165,7 +165,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>330</y>
+     <y>380</y>
      <width>481</width>
      <height>291</height>
     </rect>
@@ -180,9 +180,9 @@
   <widget class="QLineEdit" name="Searchbar">
    <property name="geometry">
     <rect>
-     <x>140</x>
-     <y>50</y>
-     <width>81</width>
+     <x>118</x>
+     <y>676</y>
+     <width>151</width>
      <height>25</height>
     </rect>
    </property>
@@ -206,8 +206,8 @@
   <widget class="QPushButton" name="View_enter">
    <property name="geometry">
     <rect>
-     <x>230</x>
-     <y>50</y>
+     <x>280</x>
+     <y>676</y>
      <width>89</width>
      <height>25</height>
     </rect>
@@ -219,8 +219,8 @@
   <widget class="QPushButton" name="Camonoff">
    <property name="geometry">
     <rect>
-     <x>510</x>
-     <y>630</y>
+     <x>592</x>
+     <y>676</y>
      <width>89</width>
      <height>25</height>
     </rect>
@@ -232,8 +232,8 @@
   <widget class="QPushButton" name="shot">
    <property name="geometry">
     <rect>
-     <x>610</x>
-     <y>630</y>
+     <x>692</x>
+     <y>676</y>
      <width>89</width>
      <height>25</height>
     </rect>
@@ -245,8 +245,8 @@
   <widget class="QPushButton" name="RecordStart">
    <property name="geometry">
     <rect>
-     <x>710</x>
-     <y>630</y>
+     <x>792</x>
+     <y>676</y>
      <width>89</width>
      <height>25</height>
     </rect>
@@ -258,8 +258,8 @@
   <widget class="QPushButton" name="openFile">
    <property name="geometry">
     <rect>
-     <x>340</x>
-     <y>50</y>
+     <x>380</x>
+     <y>676</y>
      <width>111</width>
      <height>25</height>
     </rect>
@@ -271,8 +271,8 @@
   <widget class="QPushButton" name="RecordStop">
    <property name="geometry">
     <rect>
-     <x>810</x>
-     <y>630</y>
+     <x>892</x>
+     <y>676</y>
      <width>89</width>
      <height>25</height>
     </rect>
@@ -349,14 +349,14 @@
   <widget class="QLabel" name="log_video_4">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>50</y>
-     <width>131</width>
+     <x>10</x>
+     <y>677</y>
+     <width>101</width>
      <height>21</height>
     </rect>
    </property>
    <property name="text">
-    <string>log video 선택</string>
+    <string>log video 선택 :</string>
    </property>
   </widget>
   <widget class="QPushButton" name="Search_f1">
@@ -428,6 +428,110 @@
    </property>
    <property name="text">
     <string>⚠️ Reset DB</string>
+   </property>
+  </widget>
+  <widget class="QTextEdit" name="textEdit">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>720</y>
+     <width>971</width>
+     <height>70</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QTableWidget" name="tableWidget">
+   <property name="geometry">
+    <rect>
+     <x>710</x>
+     <y>90</y>
+     <width>271</width>
+     <height>271</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QTableWidget" name="tableWidget_2">
+   <property name="geometry">
+    <rect>
+     <x>990</x>
+     <y>90</y>
+     <width>271</width>
+     <height>271</height>
+    </rect>
+   </property>
+   <attribute name="verticalHeaderStretchLastSection">
+    <bool>false</bool>
+   </attribute>
+   <column>
+    <property name="text">
+     <string>사원번호</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>부서번호</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>직급</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>이름</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>성별</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>입사일자</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>보안출입증_ID</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QTableWidget" name="tableWidget_3">
+   <property name="geometry">
+    <rect>
+     <x>990</x>
+     <y>410</y>
+     <width>271</width>
+     <height>261</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton">
+   <property name="geometry">
+    <rect>
+     <x>1170</x>
+     <y>20</y>
+     <width>89</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>PushButton</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>180</y>
+     <width>1021</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>TextLabel</string>
    </property>
   </widget>
  </widget>
