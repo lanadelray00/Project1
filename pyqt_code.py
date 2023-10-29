@@ -317,7 +317,7 @@ class VideoStreamGUI(QMainWindow, from_class):
         self.mode = {0:'Auto', 1:'manual'}
         self.init = 0
         # self.cnt = 0
-        # self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        # self.now = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.fps = 10
 
         # date 초기값 설정
@@ -608,7 +608,7 @@ class VideoStreamGUI(QMainWindow, from_class):
         
         # condition = lambda date : date.st
     def save_f2_data_to_csv(self):
-        self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.now = datetime.now().strftime("%Y%m%d_%H%M%S")
         with open(self.now + '_f1.csv' , 'w', newline='') as csv_file:
             csv_writer = csv.writer(csv_file)
             table_widget = self.f2_log
@@ -623,7 +623,7 @@ class VideoStreamGUI(QMainWindow, from_class):
                 csv_writer.writerow(row_data)
 
     def save_f1_data_to_csv(self):
-        self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.now = datetime.now().strftime("%Y%m%d_%H%M%S")
         with open(self.now + '_f1.csv' , 'w', newline='') as csv_file:
             csv_writer = csv.writer(csv_file)
             table_widget = self.f1_log
@@ -781,7 +781,7 @@ class VideoStreamGUI(QMainWindow, from_class):
         self.log_frame.setPixmap(self.pixmap2)
 
     def capture(self):
-        self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.now = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = self.now + '.png'
         image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
         cv2.imwrite(filename, image)
@@ -820,7 +820,7 @@ class VideoStreamGUI(QMainWindow, from_class):
         self.record.running = True
         self.record.start()
 
-        self.now = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        self.now = datetime.now().strftime('%Y%m%d_%H%M%S')
         filename = self.now + '.avi'
         self.fourcc = cv2.VideoWriter_fourcc(*'XVID')
 
