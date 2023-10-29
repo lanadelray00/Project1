@@ -47,9 +47,29 @@ class WindowClass(QMainWindow, from_class):
         self.serial = SerialManager(self.ardu)
         self.serial.start()
 
-        self.pushButton.clicked.connect(self.Send)
+        self.pushButton_g1_open.clicked.connect(self.Send)
+        self.pushButton_g1_close.clicked.connect(self.Send)
+        self.pushButton_g2_open.clicked.connect(self.Send)
+        self.pushButton_g2_close.clicked.connect(self.Send)
         self.serial.receive.connect(self.Recv)
 
+    def Send(self):
+        sending_button = self.sender()
+
+        if sending_button == self.pushButton_g1_open:
+            text = 'a'
+
+        elif sending_button == self.pushButton_g1_close:
+            text = 'b'
+
+        elif sending_button == self.pushButton_g2_open:
+            text = 'c'
+
+        elif sending_button == self.pushButton_g2_close:
+            text = 'd'
+        
+        text += "\n"
+        self.ardu.write(text.encode())
 
     def printEmp(self, f1_uid):
         global f1_hist_index, f1_warning_index, f1_gate
@@ -91,31 +111,56 @@ class WindowClass(QMainWindow, from_class):
             self.cur.execute(query_2, ((f1_warning_index, f1_empnum, f1_uid, f1_timelog, f1_gate)))
             self.remote.commit()
 
-            # query_3 = "select * from iot_project_f1_warning order by timelog desc;"
-            # self.cur.execute(query_3)
+            self.query_3 = "select * from iot_project_f1_warning order by timelog desc;"
+
+            self.cur.execute(self.query_3)
+            self.result_query_2 = self.cur.fetchall()
+            self.df_result_query_2 = pd.DataFrame(self.result_query_2)
+
+            self.tableWidget_3.setRowCount(len(self.df_result_query_2))
+            self.tableWidget_3.clearContents()
+
+            for x in range(len(self.df_result_query_2)):
+                순번, 사원번호, 보안출입증_ID, timelog, 출입문 = self.df_result_query_2.iloc[x, :]
+                self.tableWidget_3.setItem(x, 0, QTableWidgetItem(str(순번)))
+                self.tableWidget_3.setItem(x, 1, QTableWidgetItem(str(사원번호)))
+                self.tableWidget_3.setItem(x, 2, QTableWidgetItem(str(보안출입증_ID)))
+                self.tableWidget_3.setItem(x, 3, QTableWidgetItem(str(timelog)))
+                self.tableWidget_3.setItem(x, 4, QTableWidgetItem(str(출입문)))
 
         elif f1_type == 'In':
             f1_hist_index += 1
-            query_3 = "insert into iot_project_f1_hist (순번, 사원번호, 보안출입증_ID, timelog_in, 출입문) values (%s, %s, %s, %s, %s);"
-            self.cur.execute(query_3, ((f1_hist_index, f1_empnum, f1_uid, f1_timelog, f1_gate)))
+            query_2 = "insert into iot_project_f1_hist (순번, 사원번호, 보안출입증_ID, timelog_in, 출입문) values (%s, %s, %s, %s, %s);"
+            self.cur.execute(query_2, ((f1_hist_index, f1_empnum, f1_uid, f1_timelog, f1_gate)))
             self.remote.commit()
 
-            # query_3 = "select * from iot_project_f1_hist order by timelog_in desc;"
-            # self.cur.execute(query_3)
+            self.query_3 = "select * from iot_project_f1_hist order by timelog_in desc;"
 
         elif f1_type == 'Out':
-            query_4 = "update iot_project_f1_hist set timelog_out='" +  f1_timelog + "' order by timelog_in desc limit 1;"
-            self.cur.execute(query_4)
+            query_2 = "update iot_project_f1_hist set timelog_out='" +  f1_timelog + "' order by timelog_in desc limit 1;"
+            self.cur.execute(query_2)
             self.remote.commit()
 
-            query_3 = "select * from iot_project_f1_hist order by timelog_in desc;"
-            self.cur.execute(query_3)
+            self.query_3 = "select * from iot_project_f1_hist order by timelog_in desc;"
 
-            result = self.cur.fetchall()
-            for row in result:
-                print(row)
-            self.remote.close()
+        if f1_type == 'In' or f1_type == 'Out':
+            self.cur.execute(self.query_3)
+            self.result_query_2 = self.cur.fetchall()
+            self.df_result_query_2 = pd.DataFrame(self.result_query_2)
 
+            self.tableWidget.setRowCount(len(self.df_result_query_2))
+            self.tableWidget.clearContents()
+
+            for x in range(len(self.df_result_query_2)):
+                순번, 사원번호, 보안출입증_ID, timelog_in, timelog_out, 출입문 = self.df_result_query_2.iloc[x, :]
+                self.tableWidget.setItem(x, 0, QTableWidgetItem(str(순번)))
+                self.tableWidget.setItem(x, 1, QTableWidgetItem(str(사원번호)))
+                self.tableWidget.setItem(x, 2, QTableWidgetItem(str(보안출입증_ID)))
+                self.tableWidget.setItem(x, 3, QTableWidgetItem(str(timelog_in)))
+                self.tableWidget.setItem(x, 4, QTableWidgetItem(str(timelog_out)))
+                self.tableWidget.setItem(x, 5, QTableWidgetItem(str(출입문)))
+
+        self.remote.close()
 
     def Connect(self):
         self.remote = mysql.connector.connect(
@@ -132,18 +177,9 @@ class WindowClass(QMainWindow, from_class):
         )
         self.cur = self.remote.cursor(buffered=True)
 
-    def Send(self):
-        text = self.lineEdit.text()
-        text += "\n"
-        self.ardu.write(text.encode())
-
-        #if self.conn.readable():
-        #    res = self.conn.readline()
-        #    self.textEdit.append(res.decode())
-
     def Recv(self, message):
         self.textEdit.append(message)
-        self.printEmp(message)
+        # self.printEmp(message)
 
 
 class SerialManager(QThread):
@@ -171,15 +207,15 @@ class SerialManager(QThread):
             # 시리얼 모니터 출력 값
             serial_data = self.serial.readline().decode()
             parts = serial_data.strip().split()
-            # self.receive.emit(str(parts))
+            self.receive.emit(str(parts))
 
             if serial_data.find("peopleCount") > -1:
-                # print(parts)
+                print(parts)
                 f1_count, check_in, check_out = parts[1], parts[2], parts[3]
-                print(parts[1], parts[2], parts[3]) 
+                # print(parts[1], parts[2], parts[3]) 
                 
                 if check_in == '1' or check_out == '1':
-                    print('Change!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+                    # print('Change!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
                     
                     if check_in == '1':
                         f1_inout = 1
@@ -205,7 +241,7 @@ class SerialManager(QThread):
             if (serial_data.find("In") > -1) or (serial_data.find("Out") > -1) or (serial_data.find("Warning") > -1):
                 f1_uid = str(serial_data)[:-2]
                 # print(f1_uid)
-                self.receive.emit(f1_uid)
+                # self.receive.emit(f1_uid)
 
         except Exception as ex:
             print(ex)
