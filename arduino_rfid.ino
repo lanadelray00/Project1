@@ -178,9 +178,9 @@ void loop() {
   distance1 = duration1 * 17 / 1000;
   distance2 = duration2 * 17 / 1000;
 
-  // Serial.print(distance1);
-  // Serial.print(", ");
-  // Serial.println(distance2);
+  Serial.print(distance1);
+  Serial.print(", ");
+  Serial.println(distance2);
 
   if (flag_print == true) {
     Serial.print("peopleCount");
