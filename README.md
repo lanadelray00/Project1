@@ -1,5 +1,15 @@
 # 센서 및 IoT / 산업 현장 안전 관리 시스템
 
+
+🧑‍🤝‍🧑 역할 분담
+
+|이름|역할|
+|------|--------|
+|강민구|시스템 전체에 대한 PyQt 및 DB 관리 시스템 구축|
+|김준표|출입문 감지 시스템 및 출입 정보 DB 업데이트 기능 구현|
+|김창미|출입문 감지 시스템 및 RFID 기능 구현, PyQt 및 DB 시스템 구축|
+|최규호|위험 지역 접근 감지 시스템 아두이노 구현|
+
 ## 🏆 하드웨어 및 소프트웨어 구성도
 ![image](https://github.com/changmi-kim/changmi-kim.github.io/assets/141194237/541b7d2d-5997-424f-b829-34d9693344d6)
 [https://drive.google.com/file/d/1gtUsnsUkhlHpAqQX9k2jctidUJYdlS1m/view?usp=sharing](https://drive.google.com/file/d/1gtUsnsUkhlHpAqQX9k2jctidUJYdlS1m/view?usp=sharing)
