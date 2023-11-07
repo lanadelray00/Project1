@@ -1,9 +1,9 @@
 # 센서 및 IoT / 산업 현장 안전 관리 시스템
 
-✍️ [draw.io]하드웨어 및 소프트웨어 구성도
+## 하드웨어 및 소프트웨어 구성도
 https://drive.google.com/file/d/1gtUsnsUkhlHpAqQX9k2jctidUJYdlS1m/view?usp=sharing
 
-![image](https://github.com/addinedu-ros-3rd/iot-repo-6/assets/87626122/83cbf394-a7b5-42c5-be6e-e9763a3b3e63)
+![image](https://github.com/changmi-kim/changmi-kim.github.io/assets/141194237/541b7d2d-5997-424f-b829-34d9693344d6)
 
 ✍️ PPT  
 https://docs.google.com/presentation/d/1AWp36OybdQL008NTzZpEw1TwQ33S21eg/edit?usp=sharing&ouid=102784698114875004183&rtpof=true&sd=true
