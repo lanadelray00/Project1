@@ -1,11 +1,11 @@
-![image](https://github.com/addinedu-ros-3rd/iot-repo-6/assets/141194237/66bba57b-bfb8-481f-a847-2e9f51ba17ec)# 센서 및 IoT / 산업 현장 안전 관리 시스템
+# 센서 및 IoT / 산업 현장 안전 관리 시스템
 
 ## 🏆 하드웨어 및 소프트웨어 구성도
 ![image](https://github.com/changmi-kim/changmi-kim.github.io/assets/141194237/541b7d2d-5997-424f-b829-34d9693344d6)
 [https://drive.google.com/file/d/1gtUsnsUkhlHpAqQX9k2jctidUJYdlS1m/view?usp=sharing](https://drive.google.com/file/d/1gtUsnsUkhlHpAqQX9k2jctidUJYdlS1m/view?usp=sharing)
 
-## 🏆 안전 관리 DB 시스템
-![image](https://github.com/addinedu-ros-3rd/iot-repo-6/assets/141194237/e4fcbbaf-ab10-474a-96a7-a29d4e9de6ff)
+## 🏆 안전 관리 DB 시스템 순서도
+![image](https://github.com/changmi-kim/changmi-kim.github.io/assets/141194237/d29ee2cd-eb3c-45d1-9cda-bb8a99d65fa6)
 
 ## 🏆 PPT 자료
 https://docs.google.com/presentation/d/1AWp36OybdQL008NTzZpEw1TwQ33S21eg/edit?usp=sharing&ouid=102784698114875004183&rtpof=true&sd=true
