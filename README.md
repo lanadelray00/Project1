@@ -1,13 +1,13 @@
-센서 및 IoT / 산업 현장 안전 관리 시스템
+# 센서 및 IoT / 산업 현장 안전 관리 시스템
 
-# 하드웨어 및 소프트웨어 구성도
+## 하드웨어 및 소프트웨어 구성도
 ![image](https://github.com/changmi-kim/changmi-kim.github.io/assets/141194237/541b7d2d-5997-424f-b829-34d9693344d6)
 [https://drive.google.com/file/d/1gtUsnsUkhlHpAqQX9k2jctidUJYdlS1m/view?usp=sharing](https://drive.google.com/file/d/1gtUsnsUkhlHpAqQX9k2jctidUJYdlS1m/view?usp=sharing)
 
-# PPT 자료
+## PPT 자료
 https://docs.google.com/presentation/d/1AWp36OybdQL008NTzZpEw1TwQ33S21eg/edit?usp=sharing&ouid=102784698114875004183&rtpof=true&sd=true
 
-# 프로젝트 소개
+## 프로젝트 소개
 
 
 🏆 안전 관리 DB 시스템 기능 리스트 및 순서도
