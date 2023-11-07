@@ -40,7 +40,7 @@ https://docs.google.com/presentation/d/1AWp36OybdQL008NTzZpEw1TwQ33S21eg/edit?us
 ![image](https://github.com/addinedu-ros-3rd/iot-repo-6/assets/141194237/d0f371ce-936b-42b5-aa69-e458ba480e18)
 
 ### 01-3. 영상
-- 첨부 예정
+https://drive.google.com/file/d/1yBXTY5m_G-dTbO4yshAdNnkUll6BzqQ0/view?usp=drive_link
 
 ## 🥇 02. 스마트 출입문 시스템 구성
 ### 02-1. HW
@@ -51,6 +51,7 @@ https://docs.google.com/presentation/d/1AWp36OybdQL008NTzZpEw1TwQ33S21eg/edit?us
 
 ### 02-3. 스마트 도어 시스템 동작시 DB및 PyQt 업데이트
 ![image](https://github.com/addinedu-ros-3rd/iot-repo-6/assets/87626122/0c86df78-afea-45de-ae79-167017b12dd2)
+
 
 ### 02-4. 실행 방법
 - arduino_rfid.ino, all_in_one_fuinalalll_ver.ino를 참고하여 아두이노와 포트와 PC 연결
